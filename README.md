@@ -1,92 +1,73 @@
+# React + TypeScript + Vite
 
-# URL Shortener
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Overview
-A lightweight and efficient URL shortener built with Node.js, Express.js, and MongoDB Atlas. Users can shorten long URLs, share them, and track click analytics. The project features rate limiting, input validation, and a simple web interface.
+Currently, two official plugins are available:
 
-## 🌐 Live Demo
-Try the deployed app here: [https://url-shortener-xi-bay.vercel.app/](https://url-shortener-xi-bay.vercel.app/)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-Roadmap Projects Link : https://roadmap.sh/projects/url-shortening-service
-## 📂 Project Structure
+## React Compiler
 
-```bash
-URL-Shortener/
-│-- config/
-│   └── db.js                # Database connection setup
-│-- controllers/
-│   └── url.controller.js    # Business logic for URL operations
-│-- middlewares/
-│   ├── asyncWrapper.js      # Async error handling middleware
-│   └── validator.middleware.js # Validation middleware
-│-- models/
-│   └── shortUrl.model.js    # Mongoose schema/model for URLs
-│-- routes/
-│   └── url.routes.js        # API endpoints for URL operations
-│-- utils/
-│   └── url.validator.js     # URL validation logic
-│-- views/
-│   └── index.ejs            # Frontend template
-│-- server.js                # Main entry point (Express server)
-│-- package.json             # Project metadata and dependencies
-│-- vercel.json              # Vercel deployment config
-│-- page-image.jpg           # Screenshot preview
-│-- README.md                # Project documentation
-│-- .env                     # Environment variables (not committed)
-│-- .gitignore               # Git ignore file
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## 📸 Screenshot
-![Screenshot Preview](./main-page-urlshortener.jpg)
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-## 🚀 Getting Started
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-### 📌 Prerequisites
-- [Node.js](https://nodejs.org/) installed
-- [MongoDB Atlas](https://www.mongodb.com/atlas) account
-
-### 🔧 Installation
-Follow these steps to set up the project locally:
-
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Mahmoud142/URL-Shortener.git
-   ```
-2. **Navigate to the project directory**
-   ```bash
-   cd URL-Shortener
-   ```
-3. **Install dependencies**
-   ```bash
-   npm install
-   ```
-4. **Create a `.env` file in the root directory and add your MongoDB Atlas connection string:**
-   ```env
-   DB_URL=your_mongodb_atlas_connection_string
-   ```
-
-## ⚡ Usage
-
-1. **Start the server**
-   ```bash
-   npm run dev
-   # or
-   node server.js
-   ```
-2. **Open your browser and go to:**
-   [http://localhost:3000/](http://localhost:3000/)
-
-## 🌟 Features
-- Shorten long URLs
-- Track number of clicks for each short URL
-- Input validation and error handling
-- Rate limiting to prevent abuse
-- Simple web interface (Bootstrap)
-- MongoDB Atlas for cloud database
-- Ready for deployment on Vercel
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to fork this repository, make improvements, and submit a pull request.
-
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
