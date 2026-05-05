@@ -3,15 +3,12 @@ import {
     BarChart3,
     Bell,
     CreditCard,
-    KeyRound,
     LayoutDashboard,
     LogOut,
     MoreVertical,
     Settings,
     Smartphone,
-    UserRound,
     Link as LinkIcon,
-    Plus,
     Moon,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
