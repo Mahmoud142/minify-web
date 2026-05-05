@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ArrowRight, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 
 export default function Login() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +13,10 @@ export default function Login() {
         e.preventDefault();
         setIsLoading(true);
         // Simulate login
-        setTimeout(() => setIsLoading(false), 1500);
+        setTimeout(() => {
+            setIsLoading(false);
+            navigate("/dashboard");
+        }, 1500);
     };
 
     return (
