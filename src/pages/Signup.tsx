@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ArrowRight, Lock, Mail, Phone, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 
 export default function Signup() {
+    const navigate = useNavigate();
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -15,7 +16,10 @@ export default function Signup() {
     const handleSignup = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 1500);
+        setTimeout(() => {
+            setIsLoading(false);
+            navigate("/dashboard");
+        }, 1500);
     };
 
     return (
@@ -74,7 +78,9 @@ export default function Signup() {
                 <div className="login-box signup-box glass-panel animate-fade-in delay-100">
                     <div className="login-header">
                         <h2>Create account</h2>
-                        <p>Sign up to start shortening and tracking your links</p>
+                        <p>
+                            Sign up to start shortening and tracking your links
+                        </p>
                     </div>
 
                     <form onSubmit={handleSignup} className="login-form">
