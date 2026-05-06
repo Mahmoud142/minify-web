@@ -5,7 +5,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./layouts/DashboardLayout";
 import MyLinks from "./pages/MyLinks";
-import LinktreeBuilder from "./pages/LinktreeBuilder";
+import LinktreeBuilder from "./pages/Linktree/LinktreeBuilder";
 import Analytics from "./pages/Analytics";
 
 function App() {
