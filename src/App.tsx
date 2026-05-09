@@ -10,17 +10,21 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import MyLinks from "./pages/MyLinks";
 import LinktreeBuilder from "./pages/Linktree/LinktreeBuilder";
 import Analytics from "./pages/Analytics";
+import AuthLayout from "./layouts/AuthLayout";
 
 function App() {
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/verify-code" element={<VerifyCode />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
+                
+                <Route element={<AuthLayout />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/verify-code" element={<VerifyCode />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                </Route>
 
                 <Route element={<DashboardLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
