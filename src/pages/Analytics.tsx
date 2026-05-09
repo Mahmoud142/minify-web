@@ -49,10 +49,7 @@ export default function Analytics() {
     ];
 
     return (
-        <div
-            className="dashboard-workspace"
-            style={{ gridTemplateColumns: "1fr" }}
-        >
+        <div className="dashboard-workspace single-column-workspace">
             <div className="analytics analytics-container">
                 <div className="analytics-header">
                     <div>
@@ -62,16 +59,10 @@ export default function Analytics() {
                         </p>
                     </div>
                     <div
-                        className="glass-panel"
-                        style={{
-                            padding: "0.5rem 1rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
+                        className="glass-panel analytics-date-filter"
                     >
                         <Calendar size={16} color="var(--accent-primary)" />
-                        <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                        <span className="analytics-date-text">
                             Last 30 Days
                         </span>
                     </div>
@@ -93,24 +84,14 @@ export default function Analytics() {
 
                     <div className="glass-panel stat-card">
                         <div
-                            className="stat-icon"
-                            style={{
-                                background: "rgba(139, 92, 246, 0.1)",
-                                color: "var(--accent-secondary)",
-                            }}
+                            className="stat-icon icon-purple"
                         >
                             <TrendingUp size={24} />
                         </div>
                         <div className="stat-label">Best Average Clicks</div>
                         <div className="stat-value">
                             42.5
-                            <span
-                                style={{
-                                    fontSize: "1rem",
-                                    color: "var(--text-secondary)",
-                                    marginLeft: "4px",
-                                }}
-                            >
+                            <span className="stat-value-suffix">
                                 / day
                             </span>
                         </div>
@@ -122,20 +103,13 @@ export default function Analytics() {
 
                     <div className="glass-panel stat-card">
                         <div
-                            className="stat-icon"
-                            style={{
-                                background: "rgba(16, 185, 129, 0.1)",
-                                color: "#10b981",
-                            }}
+                            className="stat-icon icon-green"
                         >
                             <Globe size={24} />
                         </div>
                         <div className="stat-label">Top Location</div>
                         <div className="stat-value">USA</div>
-                        <div
-                            className="stat-trend"
-                            style={{ color: "var(--text-secondary)" }}
-                        >
+                        <div className="stat-trend trend-neutral">
                             <span>Dominating 45% of traffic</span>
                         </div>
                     </div>
