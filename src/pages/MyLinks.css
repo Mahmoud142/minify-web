@@ -319,3 +319,21 @@
         gap: 1rem;
     }
 }
+
+.mylinks-page .empty-icon {
+    opacity: 0.2;
+    margin-bottom: 1rem;
+}
+
+.mylinks-page .empty-text {
+    font-size: 1.1rem;
+}
+
+.mylinks-page .empty-subtext {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.mylinks-page .external-icon {
+    opacity: 0.7;
+}
