@@ -88,10 +88,10 @@ function Home() {
     };
 
     return (
-        <div className="app-container">
+        <div className="app-container home-page-enter">
             <div className="bg-glow"></div>
 
-            <header className="animate-fade-in">
+            <header>
                 <div className="logo">
                     <svg
                         viewBox="0 0 350 100"
@@ -141,18 +141,18 @@ function Home() {
             </header>
 
             <main>
-                <h1 className="hero-title animate-fade-in delay-100">
+                <h1 className="hero-title">
                     Make every <span className="text-gradient">link</span>{" "}
                     count.
                 </h1>
 
-                <p className="hero-subtitle animate-fade-in delay-200">
+                <p className="hero-subtitle">
                     A powerful URL shortener built for speed, reliability, and
                     analytics. Transform long, ugly links into clean, trackable
                     URLs.
                 </p>
 
-                <div className="shortener-box glass-panel animate-fade-in delay-300">
+                <div className="shortener-box glass-panel">
                     <form onSubmit={handleShorten}>
                         <div className="input-group">
                             <div className="input-wrapper">
@@ -240,7 +240,7 @@ function Home() {
                 </div>
 
                 {recentLinks.length > 0 && (
-                    <div className="recent-links-section animate-fade-in delay-300">
+                    <div className="recent-links-section">
                         <div className="section-header">
                             <History size={20} className="text-gradient" />
                             <h2>Recent Links</h2>
@@ -307,7 +307,7 @@ function Home() {
                 )}
 
                 <div
-                    className="features-grid animate-fade-in delay-500"
+                    className="features-grid"
                 >
                     <div className="feature-card">
                         <div className="feature-icon">
