@@ -97,7 +97,7 @@ function Home() {
                         viewBox="0 0 350 100"
                         width="140"
                         height="40"
-                        style={{ display: "block" }}
+                        className="home-logo-svg"
                     >
                         <defs>
                             <linearGradient
@@ -122,13 +122,7 @@ function Home() {
                         <text
                             x="105"
                             y="68"
-                            style={{
-                                fontFamily: "'Inter', sans-serif",
-                                fontSize: "56px",
-                                fontWeight: 800,
-                                fill: "var(--text-primary)",
-                                letterSpacing: "-1px",
-                            }}
+                            className="home-logo-text"
                         >
                             Minify
                         </text>
@@ -139,13 +133,7 @@ function Home() {
                     <a href="#pricing">Pricing</a>
                     <Link
                         to="/login"
-                        className="btn btn-primary"
-                        style={{
-                            padding: "0.5rem 1.25rem",
-                            fontSize: "0.85rem",
-                            textDecoration: "none",
-                            color: "white",
-                        }}
+                        className="btn btn-primary home-login-btn"
                     >
                         Login
                     </Link>
@@ -319,8 +307,7 @@ function Home() {
                 )}
 
                 <div
-                    className="features-grid animate-fade-in delay-300"
-                    style={{ animationDelay: "500ms" }}
+                    className="features-grid animate-fade-in delay-500"
                 >
                     <div className="feature-card">
                         <div className="feature-icon">

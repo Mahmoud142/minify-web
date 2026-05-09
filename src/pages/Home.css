@@ -673,3 +673,26 @@ footer {
         border-bottom: 1px solid var(--border-color);
     }
 }
+
+.home-logo-svg {
+    display: block;
+}
+
+.home-logo-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    fill: var(--text-primary);
+    letter-spacing: -1px;
+}
+
+.home-login-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: white;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
