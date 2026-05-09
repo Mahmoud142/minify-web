@@ -159,67 +159,29 @@ function Dashboard() {
                         <Link2 size={22} />
                     </div>
                     <div
-                        className="metrics-list"
-                        style={{
-                            marginTop: "1rem",
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
-                            gap: "1rem",
-                        }}
+                        className="metrics-list dashboard-metrics-grid"
                     >
                         {urls.slice(0, 3).map((url) => (
                             <div
                                 key={url.id}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    padding: "1rem",
-                                    background: "rgba(255,255,255,0.05)",
-                                    borderRadius: "8px",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                    alignItems: "center",
-                                }}
+                                className="dashboard-url-card"
                             >
                                 <div
-                                    style={{
-                                        overflow: "hidden",
-                                        paddingRight: "1rem",
-                                        flex: 1,
-                                    }}
+                                    className="dashboard-url-info"
                                 >
                                     <span
-                                        style={{
-                                            display: "block",
-                                            fontSize: "1rem",
-                                            fontWeight: "600",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                            marginBottom: "0.25rem",
-                                            color: "#60a5fa",
-                                        }}
+                                        className="dashboard-url-short"
                                     >
                                         {url.short}
                                     </span>
                                     <span
-                                        style={{
-                                            display: "block",
-                                            fontSize: "0.85rem",
-                                            color: "var(--text-secondary)",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                            marginBottom: "0.5rem",
-                                        }}
+                                        className="dashboard-url-original"
                                         title={url.original}
                                     >
                                         {url.original}
                                     </span>
                                     <span
-                                        style={{
-                                            fontSize: "0.85rem",
-                                            color: "var(--text-primary)",
-                                            fontWeight: 500,
-                                        }}
+                                        className="dashboard-url-clicks"
                                     >
                                         {url.clicks} clicks
                                     </span>
@@ -227,17 +189,7 @@ function Dashboard() {
                                 <button
                                     type="button"
                                     onClick={() => copyToClipboard(url.short)}
-                                    style={{
-                                        background: "rgba(255,255,255,0.1)",
-                                        border: "none",
-                                        color: "var(--text-primary)",
-                                        cursor: "pointer",
-                                        padding: "0.6rem",
-                                        borderRadius: "6px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
+                                    className="dashboard-copy-btn"
                                     title="Copy short URL"
                                 >
                                     <Copy size={18} />
@@ -253,51 +205,19 @@ function Dashboard() {
                             <h2>Linktree Builder</h2>
                         </div>
                     </div>
-                    <div
-                        style={{
-                            marginTop: "1rem",
-                            padding: "1rem",
-                            background: "rgba(37, 99, 235, 0.1)",
-                            borderRadius: "8px",
-                            border: "1px solid rgba(37, 99, 235, 0.2)",
-                        }}
-                    >
-                        <p
-                            style={{
-                                fontSize: "0.9rem",
-                                marginBottom: "0.5rem",
-                                fontWeight: 500,
-                            }}
-                        >
+                    <div className="dashboard-linktree-card">
+                        <p className="dashboard-linktree-title">
                             batmant's Linktree
                         </p>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                            }}
-                        >
+                        <div className="dashboard-linktree-flex">
                             <a
                                 href="#"
-                                style={{
-                                    color: "var(--text-primary)",
-                                    textDecoration: "none",
-                                    fontSize: "0.85rem",
-                                }}
+                                className="dashboard-linktree-url"
                             >
                                 linktr.ee/batmant
                             </a>
                             <button
-                                style={{
-                                    background: "var(--primary-color, #2563eb)",
-                                    color: "white",
-                                    border: "none",
-                                    padding: "0.4rem 0.8rem",
-                                    borderRadius: "6px",
-                                    cursor: "pointer",
-                                    fontSize: "0.8rem",
-                                }}
+                                className="dashboard-linktree-edit-btn"
                             >
                                 Edit
                             </button>
@@ -311,76 +231,32 @@ function Dashboard() {
                 aria-label="Dashboard insights"
             >
                 <section className="panel" id="analytics">
-                    <div
-                        className="panel-heading"
-                        style={{ marginBottom: "1.5rem" }}
-                    >
+                    <div className="panel-heading dashboard-analytics-heading">
                         <div>
                             <h2>Analytics Overview</h2>
                         </div>
                         <BarChart3 size={22} />
                     </div>
 
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr",
-                            gap: "2rem",
-                        }}
-                    >
+                    <div className="dashboard-analytics-grid">
                         <div>
-                            <h3
-                                style={{
-                                    fontSize: "1rem",
-                                    marginBottom: "1rem",
-                                    color: "var(--text-primary)",
-                                }}
-                            >
+                            <h3 className="dashboard-analytics-title">
                                 Top Visited Links
                             </h3>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "0.8rem",
-                                }}
-                            >
+                            <div className="dashboard-analytics-list">
                                 {[...urls]
                                     .sort((a, b) => b.clicks - a.clicks)
                                     .slice(0, 4)
                                     .map((url) => (
-                                        <div
-                                            key={url.id}
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                borderBottom:
-                                                    "1px solid rgba(255,255,255,0.05)",
-                                                paddingBottom: "0.5rem",
-                                            }}
-                                        >
+                                        <div key={url.id} className="dashboard-analytics-item">
                                             <div>
-                                                <a
-                                                    href={url.short}
-                                                    style={{
-                                                        color: "#60a5fa",
-                                                        textDecoration: "none",
-                                                        fontWeight: 500,
-                                                    }}
-                                                >
+                                                <a href={url.short} className="dashboard-analytics-link">
                                                     {url.short.replace(
                                                         "https://",
                                                         "",
                                                     )}
                                                 </a>
-                                                <span
-                                                    style={{
-                                                        display: "block",
-                                                        fontSize: "0.8rem",
-                                                        color: "var(--text-secondary)",
-                                                    }}
-                                                >
+                                                <span className="dashboard-analytics-original">
                                                     {url.original.substring(
                                                         0,
                                                         30,
@@ -388,12 +264,7 @@ function Dashboard() {
                                                     ...
                                                 </span>
                                             </div>
-                                            <div
-                                                style={{
-                                                    fontWeight: 600,
-                                                    fontSize: "0.95rem",
-                                                }}
-                                            >
+                                            <div className="dashboard-analytics-clicks">
                                                 {url.clicks.toLocaleString()}
                                             </div>
                                         </div>
@@ -402,40 +273,16 @@ function Dashboard() {
                         </div>
 
                         <div>
-                            <h3
-                                style={{
-                                    fontSize: "1rem",
-                                    marginBottom: "1rem",
-                                    color: "var(--text-primary)",
-                                }}
-                            >
+                            <h3 className="dashboard-analytics-title">
                                 Top Locations
                             </h3>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "1rem",
-                                }}
-                            >
+                            <div className="dashboard-location-list">
                                 {countryStats.map((item) => (
                                     <div key={item.country}>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                fontSize: "0.9rem",
-                                                marginBottom: "0.3rem",
-                                            }}
-                                        >
+                                        <div className="dashboard-location-item">
                                             <span>
                                                 {item.country}{" "}
-                                                <span
-                                                    style={{
-                                                        color: "var(--text-secondary)",
-                                                        fontSize: "0.8rem",
-                                                    }}
-                                                >
+                                                <span className="dashboard-location-city">
                                                     ({item.city})
                                                 </span>
                                             </span>
@@ -443,23 +290,11 @@ function Dashboard() {
                                                 {item.clicks.toLocaleString()}
                                             </strong>
                                         </div>
-                                        <div
-                                            style={{
-                                                width: "100%",
-                                                height: "6px",
-                                                background:
-                                                    "rgba(255,255,255,0.1)",
-                                                borderRadius: "3px",
-                                                overflow: "hidden",
-                                            }}
-                                        >
+                                        <div className="dashboard-location-bar-bg">
                                             <div
+                                                className="dashboard-location-bar-fill"
                                                 style={{
                                                     width: `${item.percent}%`,
-                                                    height: "100%",
-                                                    background:
-                                                        "var(--primary-color, #2563eb)",
-                                                    borderRadius: "3px",
                                                 }}
                                             />
                                         </div>
