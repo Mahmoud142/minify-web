@@ -86,7 +86,7 @@ export default function ResetPassword() {
                                     <h2>Password Updated!</h2>
                                     <p>Your password has been changed successfully. You can now log in with your new password.</p>
                                 </div>
-                                <Link to="/login" className="btn btn-primary reset-password-submit-btn" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Link to="/login" className="btn btn-primary reset-password-submit-btn reset-success-link">
                                     Go to Login
                                 </Link>
                             </div>
