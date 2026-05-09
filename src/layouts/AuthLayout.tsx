@@ -10,14 +10,13 @@ export default function AuthLayout() {
                 <header className="animate-fade-in">
                     <Link
                         to="/"
-                        className="logo"
-                        style={{ textDecoration: "none" }}
+                        className="logo logo-link"
                     >
                         <svg
                             viewBox="0 0 350 100"
                             width="140"
                             height="40"
-                            style={{ display: "block" }}
+                            className="logo-svg"
                         >
                             <defs>
                                 <linearGradient
@@ -42,13 +41,7 @@ export default function AuthLayout() {
                             <text
                                 x="105"
                                 y="68"
-                                style={{
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: "56px",
-                                    fontWeight: 800,
-                                    fill: "var(--text-primary)",
-                                    letterSpacing: "-1px",
-                                }}
+                                className="logo-text"
                             >
                                 Minify
                             </text>
@@ -56,7 +49,7 @@ export default function AuthLayout() {
                     </Link>
                 </header>
 
-                <div className="animate-fade-in delay-100" style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
+                <div className="animate-fade-in delay-100 auth-outlet-wrapper">
                     <Outlet />
                 </div>
             </div>
