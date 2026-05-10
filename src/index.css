@@ -75,19 +75,11 @@ body {
     justify-content: center;
 }
 
-/* Inputs & Buttons */
-.input-wrapper {
-    position: relative;
-    width: 100%;
-}
-
+/* Shared input base — only safe, non-layout properties */
 .input-field {
     width: 100%;
-    padding: 1rem 1.5rem;
-    padding-right: 4rem;
     background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-full);
     color: var(--text-primary);
     font-size: 1rem;
     font-family: inherit;
@@ -105,12 +97,11 @@ body {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
+/* Shared button base — only safe, non-layout properties */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-full);
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
@@ -121,54 +112,9 @@ body {
     white-space: nowrap;
 }
 
-@media (max-width: 640px) {
-    .input-field {
-        padding: 0.9rem 1rem;
-        padding-right: 3.5rem;
-        font-size: 0.95rem;
-    }
-
-    .btn {
-        padding: 0.7rem 1rem;
-    }
-}
-
 .btn-primary {
     background: var(--accent-primary);
     color: white;
-    box-shadow: var(--shadow-accent);
-}
-
-.btn-primary:hover {
-    background-color: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
-}
-
-.btn-primary:active {
-    transform: translateY(0);
-}
-
-.btn-icon {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent-primary);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.btn-icon:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: var(--shadow-accent);
 }
 
 /* Animations */
@@ -212,4 +158,27 @@ body {
 
 .delay-300 {
     animation-delay: 300ms;
+}
+
+/* Global Logo Styles */
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    flex: 0 0 auto;
+    gap: 0.5rem;
+}
+
+.logo-svg {
+    display: block;
+    width: clamp(112px, 22vw, 140px);
+    height: auto;
+}
+
+.logo-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    fill: var(--text-primary);
+    letter-spacing: -1px;
 }
