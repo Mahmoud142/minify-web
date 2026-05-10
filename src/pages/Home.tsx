@@ -5,12 +5,15 @@ import {
     Copy,
     CheckCircle2,
     Zap,
-    Shield,
     BarChart3,
     Settings2,
     ExternalLink,
     History,
     QrCode,
+    Layout,
+    Globe,
+    Layers,
+    MousePointer2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -119,18 +122,14 @@ function Home() {
                             strokeLinejoin="round"
                             strokeLinecap="round"
                         />
-                        <text
-                            x="105"
-                            y="68"
-                            className="logo-text"
-                        >
+                        <text x="105" y="68" className="logo-text">
                             Minify
                         </text>
                     </svg>
                 </Link>
                 <nav className="nav-links">
                     <a href="#features">Features</a>
-                    <a href="#pricing">Pricing</a>
+                    <a href="#bio-pages">Bio Pages</a>
                     <Link
                         to="/login"
                         className="btn btn-primary home-login-btn"
@@ -142,14 +141,15 @@ function Home() {
 
             <main>
                 <h1 className="hero-title">
-                    Make every <span className="text-gradient">link</span>{" "}
-                    count.
+                    Your <span className="text-gradient">digital presence</span>
+                    , <br />
+                    unified in one link.
                 </h1>
 
                 <p className="hero-subtitle">
-                    A powerful URL shortener built for speed, reliability, and
-                    analytics. Transform long, ugly links into clean, trackable
-                    URLs.
+                    The ultimate URL shortener and bio-link builder. Transform
+                    long links, create beautiful profiles, and track everything
+                    with advanced analytics.
                 </p>
 
                 <div className="shortener-box glass-panel">
@@ -243,7 +243,7 @@ function Home() {
                     <div className="recent-links-section">
                         <div className="section-header">
                             <History size={20} className="text-gradient" />
-                            <h2>Recent Links</h2>
+                            <h2>Recent Activity</h2>
                         </div>
                         <div className="links-list">
                             {recentLinks.map((link) => (
@@ -306,28 +306,77 @@ function Home() {
                     </div>
                 )}
 
-                <div
-                    className="features-grid"
-                >
+                <section className="bio-showcase" id="bio-pages">
+                    <div className="bio-content">
+                        <div className="badge">New: Bio Pages</div>
+                        <h2 className="section-title">
+                            One link for everything.
+                        </h2>
+                        <p className="section-desc">
+                            Create a stunning, mobile-optimized page that houses
+                            all your important links, social media profiles, and
+                            content. Perfect for Instagram, TikTok, and Twitter
+                            bios.
+                        </p>
+                        <ul className="bio-features">
+                            <li>
+                                <Layers size={18} /> Unlimited custom links
+                            </li>
+                            <li>
+                                <Globe size={18} /> Custom domain support
+                            </li>
+                            <li>
+                                <BarChart3 size={18} /> Per-link click analytics
+                            </li>
+                        </ul>
+                        <Link to="/signup" className="btn btn-primary">
+                            Create Your Bio-Link <ArrowRight size={18} />
+                        </Link>
+                    </div>
+                    <div className="bio-preview glass-panel">
+                        <div className="preview-header">
+                            <div className="preview-avatar"></div>
+                            <div className="preview-name">@yourname</div>
+                            <div className="preview-bio">
+                                Digital Creator & Designer
+                            </div>
+                        </div>
+                        <div className="preview-links">
+                            <div className="preview-link">My Portfolio</div>
+                            <div className="preview-link">
+                                Latest YouTube Video
+                            </div>
+                            <div className="preview-link">New Merchandise</div>
+                            <div className="preview-link featured">
+                                Follow on Instagram
+                            </div>
+                        </div>
+                        <div className="preview-cursor">
+                            <MousePointer2 size={20} fill="currentColor" />
+                        </div>
+                    </div>
+                </section>
+
+                <div className="features-grid" id="features">
                     <div className="feature-card">
                         <div className="feature-icon">
                             <Zap size={24} />
                         </div>
-                        <h3 className="feature-title">Lightning Fast</h3>
+                        <h3 className="feature-title">Smart Shortening</h3>
                         <p className="feature-desc">
-                            Experience zero latency redirection globally,
-                            powered by edge computing infrastructure.
+                            Auto-shorten links with custom aliases and branded
+                            domains for better click-through rates.
                         </p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon">
-                            <Shield size={24} />
+                            <Layout size={24} />
                         </div>
-                        <h3 className="feature-title">Secure & Reliable</h3>
+                        <h3 className="feature-title">Bio-Link Builder</h3>
                         <p className="feature-desc">
-                            Every link is encrypted and monitored 24/7. We
-                            guarantee 99.9% uptime for all your short links.
+                            Design a beautiful landing page for your brand in
+                            minutes. Fully customizable and mobile-ready.
                         </p>
                     </div>
 
@@ -335,10 +384,10 @@ function Home() {
                         <div className="feature-icon">
                             <BarChart3 size={24} />
                         </div>
-                        <h3 className="feature-title">Advanced Analytics</h3>
+                        <h3 className="feature-title">Real-time Analytics</h3>
                         <p className="feature-desc">
-                            Track clicks, geographic data, and referrers in
-                            real-time with our comprehensive dashboard.
+                            Track every click, location, and device. Gain deep
+                            insights into your audience's behavior.
                         </p>
                     </div>
                 </div>
