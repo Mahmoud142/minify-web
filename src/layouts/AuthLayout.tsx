@@ -7,7 +7,7 @@ export default function AuthLayout() {
             <div className="app-container auth-layout">
                 <div className="bg-glow"></div>
 
-                <header className="animate-fade-in">
+                <header>
                     <Link
                         to="/"
                         className="logo logo-link"
@@ -49,7 +49,7 @@ export default function AuthLayout() {
                     </Link>
                 </header>
 
-                <div className="animate-fade-in delay-100 auth-outlet-wrapper">
+                <div className="auth-outlet-wrapper">
                     <Outlet />
                 </div>
             </div>
