@@ -92,12 +92,12 @@ function Home() {
             <div className="bg-glow"></div>
 
             <header>
-                <div className="logo">
+                <Link to="/" className="logo">
                     <svg
                         viewBox="0 0 350 100"
                         width="140"
                         height="40"
-                        className="home-logo-svg"
+                        className="logo-svg"
                     >
                         <defs>
                             <linearGradient
@@ -122,12 +122,12 @@ function Home() {
                         <text
                             x="105"
                             y="68"
-                            className="home-logo-text"
+                            className="logo-text"
                         >
                             Minify
                         </text>
                     </svg>
-                </div>
+                </Link>
                 <nav className="nav-links">
                     <a href="#features">Features</a>
                     <a href="#pricing">Pricing</a>
