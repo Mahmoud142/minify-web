@@ -326,3 +326,16 @@
         font-size: 0.8rem;
     }
 }
+
+.lt-builder-page .builder-textarea {
+    resize: none;
+}
+
+.lt-builder-page .link-card-title-bold {
+    font-weight: 700;
+}
+
+.lt-builder-page .link-card-url-faded {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}

@@ -44,7 +44,7 @@ export default function LinktreeBuilder() {
                     </div>
                     <div className="lt-form-group">
                         <label>Username / Handle</label>
-                        <div style={{ position: "relative" }}>
+                        <div className="avatar-wrapper">
                             <span className="lt-input-prefix">minify.link/</span>
                             <input 
                                 type="text" 
@@ -57,12 +57,11 @@ export default function LinktreeBuilder() {
                     <div className="lt-form-group">
                         <label>Bio</label>
                         <textarea 
-                            className="lt-input" 
+                            className="lt-input builder-textarea" 
                             rows={2} 
                             value={bio} 
                             onChange={(e) => setBio(e.target.value)}
                             placeholder="Tell the world about yourself..."
-                            style={{ resize: "none" }}
                         />
                     </div>
                 </section>
@@ -84,19 +83,17 @@ export default function LinktreeBuilder() {
                                 <div className="lt-link-inputs">
                                     <input 
                                         type="text" 
-                                        className="lt-input" 
+                                        className="lt-input link-card-title-bold" 
                                         placeholder="Title"
                                         value={link.title}
                                         onChange={(e) => updateLink(link.id, "title", e.target.value)}
-                                        style={{ fontWeight: 700 }}
                                     />
                                     <input 
                                         type="text" 
-                                        className="lt-input" 
+                                        className="lt-input link-card-url-faded" 
                                         placeholder="URL"
                                         value={link.url}
                                         onChange={(e) => updateLink(link.id, "url", e.target.value)}
-                                        style={{ fontSize: "0.85rem", opacity: 0.8 }}
                                     />
                                 </div>
                             </div>

@@ -131,17 +131,11 @@
 }
 
 /* Media Queries */
-@media (max-width: 640px) {
-    .auth-pages-wrapper .login-box {
-        padding: 2rem;
-    }
-}
-
 @media (max-width: 480px) {
     .auth-pages-wrapper .login-main {
         padding: 1rem;
         align-items: flex-start;
-        padding-top: 4rem;
+        padding-top: 1.5rem;
     }
 
     .auth-pages-wrapper .login-box {
@@ -151,17 +145,6 @@
 
     .auth-pages-wrapper .login-header {
         margin-bottom: 1.5rem;
-    }
-
-    .auth-pages-wrapper .password-header {
-        flex-direction: row;
-        align-items: center;
-    }
-}
-
-@media (max-width: 360px) {
-    .auth-pages-wrapper .login-box {
-        padding: 1.25rem;
     }
 
     .auth-pages-wrapper .login-header h2 {
@@ -176,3 +159,4 @@
         height: 44px;
     }
 }
+

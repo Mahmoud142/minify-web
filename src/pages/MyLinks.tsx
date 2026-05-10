@@ -88,9 +88,9 @@ export default function MyLinks() {
                 <div className="my-links-list">
                     {filteredLinks.length === 0 ? (
                         <div className="my-links-empty">
-                            <Link2 size={48} style={{ opacity: 0.2, marginBottom: "1rem" }} />
-                            <p style={{ fontSize: "1.1rem" }}>No links found.</p>
-                            {searchTerm && <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>Try adjusting your search term.</p>}
+                            <Link2 size={48} className="empty-icon" />
+                            <p className="empty-text">No links found.</p>
+                            {searchTerm && <p className="empty-subtext">Try adjusting your search term.</p>}
                         </div>
                     ) : (
                         filteredLinks.map((link) => (
@@ -105,7 +105,7 @@ export default function MyLinks() {
                                                 className="my-link-short"
                                             >
                                                 {link.short}
-                                                <ExternalLink size={14} style={{ opacity: 0.7 }} />
+                                                <ExternalLink size={14} className="external-icon" />
                                             </a>
                                             <span className={`my-link-status ${link.status.toLowerCase()}`}>
                                                 {link.status}

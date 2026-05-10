@@ -88,16 +88,16 @@ function Home() {
     };
 
     return (
-        <div className="app-container">
+        <div className="app-container home-page-enter">
             <div className="bg-glow"></div>
 
-            <header className="animate-fade-in">
-                <div className="logo">
+            <header>
+                <Link to="/" className="logo">
                     <svg
                         viewBox="0 0 350 100"
                         width="140"
                         height="40"
-                        style={{ display: "block" }}
+                        className="logo-svg"
                     >
                         <defs>
                             <linearGradient
@@ -122,30 +122,18 @@ function Home() {
                         <text
                             x="105"
                             y="68"
-                            style={{
-                                fontFamily: "'Inter', sans-serif",
-                                fontSize: "56px",
-                                fontWeight: 800,
-                                fill: "var(--text-primary)",
-                                letterSpacing: "-1px",
-                            }}
+                            className="logo-text"
                         >
                             Minify
                         </text>
                     </svg>
-                </div>
+                </Link>
                 <nav className="nav-links">
                     <a href="#features">Features</a>
                     <a href="#pricing">Pricing</a>
                     <Link
                         to="/login"
-                        className="btn btn-primary"
-                        style={{
-                            padding: "0.5rem 1.25rem",
-                            fontSize: "0.85rem",
-                            textDecoration: "none",
-                            color: "white",
-                        }}
+                        className="btn btn-primary home-login-btn"
                     >
                         Login
                     </Link>
@@ -153,18 +141,18 @@ function Home() {
             </header>
 
             <main>
-                <h1 className="hero-title animate-fade-in delay-100">
+                <h1 className="hero-title">
                     Make every <span className="text-gradient">link</span>{" "}
                     count.
                 </h1>
 
-                <p className="hero-subtitle animate-fade-in delay-200">
+                <p className="hero-subtitle">
                     A powerful URL shortener built for speed, reliability, and
                     analytics. Transform long, ugly links into clean, trackable
                     URLs.
                 </p>
 
-                <div className="shortener-box glass-panel animate-fade-in delay-300">
+                <div className="shortener-box glass-panel">
                     <form onSubmit={handleShorten}>
                         <div className="input-group">
                             <div className="input-wrapper">
@@ -252,7 +240,7 @@ function Home() {
                 </div>
 
                 {recentLinks.length > 0 && (
-                    <div className="recent-links-section animate-fade-in delay-300">
+                    <div className="recent-links-section">
                         <div className="section-header">
                             <History size={20} className="text-gradient" />
                             <h2>Recent Links</h2>
@@ -319,8 +307,7 @@ function Home() {
                 )}
 
                 <div
-                    className="features-grid animate-fade-in delay-300"
-                    style={{ animationDelay: "500ms" }}
+                    className="features-grid"
                 >
                     <div className="feature-card">
                         <div className="feature-icon">

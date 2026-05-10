@@ -236,3 +236,39 @@
     margin-bottom: 1.5rem;
     opacity: 0.2;
 }
+
+.dashboard-workspace.single-column-workspace {
+    grid-template-columns: 1fr;
+}
+
+.analytics-container .analytics-date-filter {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.analytics-container .analytics-date-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.analytics-container .icon-purple {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent-secondary);
+}
+
+.analytics-container .icon-green {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.analytics-container .stat-value-suffix {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.analytics-container .trend-neutral {
+    color: var(--text-secondary);
+}
