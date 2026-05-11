@@ -41,6 +41,11 @@ export async function apiRequest<TData>(
 
     if (options.token) {
         headers.set("Authorization", `Bearer ${options.token}`);
+    } else {
+        const storedToken = localStorage.getItem("minify_token");
+        if (storedToken) {
+            headers.set("Authorization", `Bearer ${storedToken}`);
+        }
     }
 
     const response = await fetch(buildUrl(path), {
