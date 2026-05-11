@@ -11,6 +11,8 @@ import MyLinks from "./pages/MyLinks";
 import LinktreeBuilder from "./pages/Linktree/LinktreeBuilder";
 import Analytics from "./pages/Analytics";
 import AuthLayout from "./layouts/AuthLayout";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 
 function App() {
     return (
@@ -18,22 +20,26 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 
-                <Route element={<AuthLayout />}>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/verify-code" element={<VerifyCode />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+                <Route element={<PublicOnlyRoute />}>
+                    <Route element={<AuthLayout />}>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/verify-code" element={<VerifyCode />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                    </Route>
                 </Route>
 
-                <Route element={<DashboardLayout />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/my-links" element={<MyLinks />} />
-                    <Route
-                        path="/linktree-builder"
-                        element={<LinktreeBuilder />}
-                    />
-                    <Route path="/analytics" element={<Analytics />} />
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<DashboardLayout />}>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/my-links" element={<MyLinks />} />
+                        <Route
+                            path="/linktree-builder"
+                            element={<LinktreeBuilder />}
+                        />
+                        <Route path="/analytics" element={<Analytics />} />
+                    </Route>
                 </Route>
             </Routes>
         </Router>

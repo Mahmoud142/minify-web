@@ -1,22 +1,33 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+    selectAuthError,
+    selectPasswordResetStatus,
+} from "../../features/auth/authSelectors";
+import {
+    clearAuthFeedback,
+    requestPasswordReset,
+} from "../../features/auth/authSlice";
 import "./ForgotPassword.css";
 
 export default function ForgotPassword() {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const status = useAppSelector(selectPasswordResetStatus);
+    const error = useAppSelector(selectAuthError);
+    const isLoading = status === "loading";
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        // Simulate sending code
-        setTimeout(() => {
-            setIsLoading(false);
-            // Pass email to next page via state
+        try {
+            await dispatch(requestPasswordReset({ email })).unwrap();
             navigate("/verify-code", { state: { email } });
-        }, 1500);
+        } catch {
+            return;
+        }
     };
 
     return (
@@ -28,6 +39,7 @@ export default function ForgotPassword() {
                         </div>
 
                         <form onSubmit={handleSubmit} className="forgot-pass-form">
+                            {error && <p className="form-alert error">{error}</p>}
                             <div className="form-group">
                                 <label htmlFor="email">Your Email</label>
                                 <div className="forgot-pass-input-wrapper">
@@ -38,7 +50,11 @@ export default function ForgotPassword() {
                                         className="input-field"
                                         placeholder="Write your email here"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoComplete="email"
+                                        onChange={(e) => {
+                                            dispatch(clearAuthFeedback());
+                                            setEmail(e.target.value);
+                                        }}
                                         required
                                     />
                                 </div>
