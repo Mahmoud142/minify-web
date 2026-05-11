@@ -42,7 +42,7 @@ export async function apiRequest<TData>(
     if (options.token) {
         headers.set("Authorization", `Bearer ${options.token}`);
     } else {
-        const storedToken = localStorage.getItem("minify_token");
+        const storedToken = localStorage.getItem("minify.auth.token");
         if (storedToken) {
             headers.set("Authorization", `Bearer ${storedToken}`);
         }
