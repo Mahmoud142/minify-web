@@ -11,7 +11,10 @@ import {
     Link as LinkIcon,
     Moon,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { selectAuthUser } from "../features/auth/authSelectors";
+import { logout } from "../features/auth/authSlice";
 
 interface DashboardNavbarProps {
     userName?: string;
@@ -25,8 +28,12 @@ const navItems = [
 ];
 
 function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { pathname } = useLocation();
+    const user = useAppSelector(selectAuthUser);
     const [openMenu, setOpenMenu] = useState<"profile" | null>(null);
+    const displayName = user?.name || userName;
 
     const toggleMenu = (menu: "profile") => {
         setOpenMenu((currentMenu) => (currentMenu === menu ? null : menu));
@@ -82,7 +89,7 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         aria-haspopup="menu"
                         onClick={() => toggleMenu("profile")}
                     >
-                        <span>{userName}</span>
+                        <span>{displayName}</span>
                         <MoreVertical size={16} />
                     </button>
                     {openMenu === "profile" && (
@@ -98,10 +105,17 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                                 <CreditCard size={16} />
                                 Billing / Subscription
                             </button>
-                            <Link to="/login" role="menuitem">
+                            <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                    dispatch(logout());
+                                    navigate("/login", { replace: true });
+                                }}
+                            >
                                 <LogOut size={16} />
                                 Logout
-                            </Link>
+                            </button>
                         </div>
                     )}
                 </div>

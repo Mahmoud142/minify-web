@@ -1,23 +1,47 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, KeyRound } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+    selectAuthError,
+    selectPasswordReset,
+    selectPasswordResetStatus,
+} from "../../features/auth/authSelectors";
+import {
+    clearAuthFeedback,
+    requestPasswordReset,
+    verifyPasswordResetCode,
+} from "../../features/auth/authSlice";
 import "./VerifyCode.css";
 
 export default function VerifyCode() {
+    const dispatch = useAppDispatch();
     const location = useLocation();
     const navigate = useNavigate();
-    const email = location.state?.email || "your email";
+    const passwordReset = useAppSelector(selectPasswordReset);
+    const email = location.state?.email || passwordReset.email || "";
     const [code, setCode] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const status = useAppSelector(selectPasswordResetStatus);
+    const error = useAppSelector(selectAuthError);
+    const isLoading = status === "loading";
 
-    const handleVerify = (e: React.FormEvent) => {
+    const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        // Simulate verification
-        setTimeout(() => {
-            setIsLoading(false);
-            navigate("/reset-password", { state: { email } });
-        }, 1500);
+        try {
+            await dispatch(verifyPasswordResetCode({ email, code })).unwrap();
+            navigate("/reset-password", { replace: true, state: { email, code } });
+        } catch {
+            return;
+        }
+    };
+
+    const handleResend = async () => {
+        if (!email) {
+            navigate("/forgot-password");
+            return;
+        }
+
+        await dispatch(requestPasswordReset({ email }));
     };
 
     return (
@@ -25,10 +49,11 @@ export default function VerifyCode() {
             <div className="verify-code-box glass-panel">
                         <div className="verify-code-header">
                             <h2>Enter Reset Code</h2>
-                            <p>We've sent a 6-digit code to <strong>{email}</strong></p>
+                            <p>We've sent a 6-digit code to <strong>{email || "your email"}</strong></p>
                         </div>
 
                         <form onSubmit={handleVerify} className="verify-code-form">
+                            {error && <p className="form-alert error">{error}</p>}
                             <div className="form-group">
                                 <label htmlFor="code">Reset Code</label>
                                 <div className="verify-code-input-wrapper">
@@ -38,10 +63,19 @@ export default function VerifyCode() {
                                         id="code"
                                         className="input-field"
                                         placeholder="000000"
+                                        inputMode="numeric"
                                         maxLength={6}
                                         value={code}
-                                        onChange={(e) => setCode(e.target.value)}
+                                        onChange={(e) => {
+                                            dispatch(clearAuthFeedback());
+                                            setCode(
+                                                e.target.value
+                                                    .replace(/\D/g, "")
+                                                    .slice(0, 6),
+                                            );
+                                        }}
                                         required
+                                        pattern="\d{6}"
                                     />
                                 </div>
                             </div>
@@ -49,7 +83,7 @@ export default function VerifyCode() {
                             <button
                                 type="submit"
                                 className={`btn btn-primary verify-code-submit-btn ${isLoading ? "loading" : ""}`}
-                                disabled={isLoading}
+                                disabled={isLoading || !email || code.length !== 6}
                             >
                                 {isLoading ? (
                                     "Verifying..."
@@ -64,7 +98,8 @@ export default function VerifyCode() {
                                 <button 
                                     type="button" 
                                     className="resend-btn"
-                                    onClick={() => alert("Code resent!")}
+                                    onClick={handleResend}
+                                    disabled={isLoading}
                                 >
                                     Resend code
                                 </button>

@@ -1,22 +1,38 @@
 import { useState } from "react";
 import { ArrowRight, Mail, Lock } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+    selectAuthError,
+    selectAuthMessage,
+    selectAuthStatus,
+} from "../../features/auth/authSelectors";
+import { clearAuthFeedback, loginUser } from "../../features/auth/authSlice";
 import "./Login.css";
 
 export default function Login() {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const status = useAppSelector(selectAuthStatus);
+    const error = useAppSelector(selectAuthError);
+    const message = useAppSelector(selectAuthMessage);
+    const isLoading = status === "loading";
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        // Simulate login
-        setTimeout(() => {
-            setIsLoading(false);
-            navigate("/dashboard");
-        }, 1500);
+        const redirectTo =
+            (location.state as { from?: { pathname?: string } } | null)?.from
+                ?.pathname ?? "/dashboard";
+
+        try {
+            await dispatch(loginUser({ email, password })).unwrap();
+            navigate(redirectTo, { replace: true });
+        } catch {
+            return;
+        }
     };
 
     return (
@@ -28,6 +44,10 @@ export default function Login() {
                         </div>
 
                         <form onSubmit={handleLogin} className="login-form">
+                            {message && (
+                                <p className="form-alert success">{message}</p>
+                            )}
+                            {error && <p className="form-alert error">{error}</p>}
                             <div className="form-group">
                                 <label htmlFor="email">Email</label>
                                 <div className="input-wrapper login-input-wrapper">
@@ -38,7 +58,11 @@ export default function Login() {
                                         className="input-field"
                                         placeholder="you@example.com"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoComplete="email"
+                                        onChange={(e) => {
+                                            dispatch(clearAuthFeedback());
+                                            setEmail(e.target.value);
+                                        }}
                                         required
                                     />
                                 </div>
@@ -59,8 +83,12 @@ export default function Login() {
                                         className="input-field"
                                         placeholder="••••••••"
                                         value={password}
+                                        autoComplete="current-password"
                                         onChange={(e) =>
+                                        {
+                                            dispatch(clearAuthFeedback());
                                             setPassword(e.target.value)
+                                        }
                                         }
                                         required
                                     />
