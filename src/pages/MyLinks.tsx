@@ -1,52 +1,50 @@
-import { useState } from "react";
-import { Link2, Trash2, Copy, ExternalLink, Calendar, BarChart2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+    Link2,
+    Trash2,
+    Copy,
+    ExternalLink,
+    Calendar,
+    BarChart2,
+    Search,
+} from "lucide-react";
 import "./MyLinks.css";
-
-interface LinkRecord {
-    id: string;
-    original: string;
-    short: string;
-    clicks: number;
-    createdAt: string;
-    status: "Active" | "Paused";
-}
-
-const initialLinks: LinkRecord[] = [
-    {
-        id: "url-1",
-        original: "https://minify.app/campaigns/spring-launch-analytics",
-        short: "https://mnf.ee/spring",
-        clicks: 2480,
-        createdAt: "May 5, 2026",
-        status: "Active",
-    },
-    {
-        id: "url-2",
-        original: "https://portfolio.example.com/case-studies/mobile-redesign",
-        short: "https://mnf.ee/portfolio",
-        clicks: 1634,
-        createdAt: "May 2, 2026",
-        status: "Active",
-    },
-    {
-        id: "url-3",
-        original: "https://shop.example.com/products/creator-bundle",
-        short: "https://mnf.ee/bundle",
-        clicks: 802,
-        createdAt: "Apr 28, 2026",
-        status: "Paused",
-    },
-];
+import { urlApi } from "../features/urls/urlApi";
+import type { UrlData } from "../features/urls/urlTypes";
 
 export default function MyLinks() {
-    const [links, setLinks] = useState<LinkRecord[]>(initialLinks);
+    const [links, setLinks] = useState<UrlData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-    const confirmDelete = () => {
+    const fetchUrls = async () => {
+        try {
+            setIsLoading(true);
+            const response = await urlApi.getMyUrls();
+            const payload = response as unknown as { urls?: UrlData[] };
+            setLinks(payload.urls || response.data?.urls || []);
+        } catch (error) {
+            console.error("Failed to fetch URLs", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchUrls();
+    }, []);
+
+    const confirmDelete = async () => {
         if (deleteConfirmId) {
-            setLinks(links.filter((link) => link.id !== deleteConfirmId));
-            setDeleteConfirmId(null);
+            try {
+                await urlApi.deleteUrl(deleteConfirmId);
+                setLinks(links.filter((link) => link._id !== deleteConfirmId));
+                setDeleteConfirmId(null);
+            } catch (error) {
+                console.error("Failed to delete URL", error);
+            }
         }
     };
 
@@ -56,8 +54,8 @@ export default function MyLinks() {
 
     const filteredLinks = links.filter(
         (link) =>
-            link.short.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            link.original.toLowerCase().includes(searchTerm.toLowerCase())
+            link.shortCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            link.originalUrl.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     return (
@@ -68,7 +66,8 @@ export default function MyLinks() {
                         <div>
                             <h2>My Links</h2>
                             <p className="my-links-subtitle">
-                                Manage all your shortened links, copy them, and track their performance.
+                                Manage all your shortened links, copy them, and
+                                track their performance.
                             </p>
                         </div>
                     </div>
@@ -86,72 +85,105 @@ export default function MyLinks() {
                 </div>
 
                 <div className="my-links-list">
-                    {filteredLinks.length === 0 ? (
+                    {isLoading ? (
+                        <div className="my-links-empty">
+                            <p className="empty-text">Loading...</p>
+                        </div>
+                    ) : filteredLinks.length === 0 ? (
                         <div className="my-links-empty">
                             <Link2 size={48} className="empty-icon" />
                             <p className="empty-text">No links found.</p>
-                            {searchTerm && <p className="empty-subtext">Try adjusting your search term.</p>}
+                            {searchTerm && (
+                                <p className="empty-subtext">
+                                    Try adjusting your search term.
+                                </p>
+                            )}
                         </div>
                     ) : (
-                        filteredLinks.map((link) => (
-                            <div key={link.id} className="my-link-item">
-                                <div className="my-links-card-content">
-                                    <div className="my-links-details">
-                                        <div className="my-link-short-wrapper">
+                        filteredLinks.map((link) => {
+                            const fullShortUrl = `${import.meta.env.VITE_API_BASE_URL || ""}/url/${link.shortCode}`;
+                            return (
+                                <div key={link._id} className="my-link-item">
+                                    <div className="my-links-card-content">
+                                        <div className="my-links-details">
+                                            <div className="my-link-short-wrapper">
+                                                <a
+                                                    href={fullShortUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="my-link-short"
+                                                >
+                                                    {fullShortUrl}
+                                                    <ExternalLink
+                                                        size={14}
+                                                        className="external-icon"
+                                                    />
+                                                </a>
+                                                <span
+                                                    className={`my-link-status ${link.isActive ? "active" : "paused"}`}
+                                                >
+                                                    {link.isActive
+                                                        ? "Active"
+                                                        : "Paused"}
+                                                </span>
+                                            </div>
+
                                             <a
-                                                href={link.short}
+                                                href={link.originalUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="my-link-short"
+                                                className="my-link-original"
                                             >
-                                                {link.short}
-                                                <ExternalLink size={14} className="external-icon" />
+                                                {link.originalUrl}
                                             </a>
-                                            <span className={`my-link-status ${link.status.toLowerCase()}`}>
-                                                {link.status}
-                                            </span>
+
+                                            <div className="my-link-stats">
+                                                <span className="my-link-stat-item">
+                                                    <BarChart2
+                                                        size={16}
+                                                        color="#60a5fa"
+                                                    />
+                                                    <strong>
+                                                        {link.totalClicks?.toLocaleString() ||
+                                                            0}
+                                                    </strong>{" "}
+                                                    clicks
+                                                </span>
+                                                <span className="my-link-stat-item">
+                                                    <Calendar size={16} />
+                                                    {new Date(
+                                                        link.createdAt,
+                                                    ).toLocaleDateString()}
+                                                </span>
+                                            </div>
                                         </div>
 
-                                        <a
-                                            href={link.original}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="my-link-original"
-                                        >
-                                            {link.original}
-                                        </a>
-                                        
-                                        <div className="my-link-stats">
-                                            <span className="my-link-stat-item">
-                                                <BarChart2 size={16} color="#60a5fa" />
-                                                <strong>{link.clicks.toLocaleString()}</strong> clicks
-                                            </span>
-                                            <span className="my-link-stat-item">
-                                                <Calendar size={16} />
-                                                {link.createdAt}
-                                            </span>
+                                        <div className="my-links-actions">
+                                            <button
+                                                onClick={() =>
+                                                    copyToClipboard(
+                                                        fullShortUrl,
+                                                    )
+                                                }
+                                                className="my-link-action-btn"
+                                                title="Copy link"
+                                            >
+                                                <Copy size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    setDeleteConfirmId(link._id)
+                                                }
+                                                className="my-link-action-btn delete"
+                                                title="Delete link"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
-                                    </div>
-
-                                    <div className="my-links-actions">
-                                        <button
-                                            onClick={() => copyToClipboard(link.short)}
-                                            className="my-link-action-btn"
-                                            title="Copy link"
-                                        >
-                                            <Copy size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => setDeleteConfirmId(link.id)}
-                                            className="my-link-action-btn delete"
-                                            title="Delete link"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </section>
@@ -164,7 +196,8 @@ export default function MyLinks() {
                         </div>
                         <h3>Delete Link?</h3>
                         <p>
-                            Are you sure you want to delete this link? This action cannot be undone and analytics will be lost.
+                            Are you sure you want to delete this link? This
+                            action cannot be undone and analytics will be lost.
                         </p>
                         <div className="my-links-modal-actions">
                             <button
