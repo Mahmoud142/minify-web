@@ -1,15 +1,14 @@
 import { useState } from "react";
 import {
     BarChart3,
-    Bell,
     CreditCard,
     LayoutDashboard,
     LogOut,
     MoreVertical,
     Settings,
     Smartphone,
+    User,
     Link as LinkIcon,
-    Moon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -23,8 +22,8 @@ interface DashboardNavbarProps {
 const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Links", path: "/my-links", icon: LinkIcon },
-    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
+    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
 ];
 
 function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
@@ -58,28 +57,12 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         className={pathname === path ? "active" : undefined}
                     >
                         <Icon size={16} />
-                        {label}
+                        <span>{label}</span>
                     </Link>
                 ))}
             </nav>
 
             <div className="dashboard-actions">
-                <button
-                    className="nav-icon-btn"
-                    type="button"
-                    title="Notifications"
-                >
-                    <Bell size={18} />
-                </button>
-
-                <button
-                    className="nav-icon-btn"
-                    type="button"
-                    title="Toggle Theme"
-                >
-                    <Moon size={18} />
-                </button>
-
                 <div className="nav-menu-wrap">
                     <button
                         className="profile-button"
@@ -89,8 +72,11 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         aria-haspopup="menu"
                         onClick={() => toggleMenu("profile")}
                     >
+                        <div className="profile-avatar">
+                            <User size={18} />
+                        </div>
                         <span>{displayName}</span>
-                        <MoreVertical size={16} />
+                        <MoreVertical size={14} className="profile-chevron" />
                     </button>
                     {openMenu === "profile" && (
                         <div
@@ -105,9 +91,11 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                                 <CreditCard size={16} />
                                 Billing / Subscription
                             </button>
+                            <div className="nav-dropdown-divider" role="separator" />
                             <button
                                 type="button"
                                 role="menuitem"
+                                className="logout-button"
                                 onClick={() => {
                                     dispatch(logout());
                                     navigate("/login", { replace: true });
