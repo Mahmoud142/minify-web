@@ -1,17 +1,44 @@
 .my-links-page.my-links-workspace {
     grid-template-columns: 1fr;
-    max-width: 1000px;
-    margin: 0 auto;
+    width: min(1180px, 100%);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(0.5rem, 1.2vw, 1rem) 1.5rem;
 }
 
 .my-links-page .my-links-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     min-height: 80vh;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 78%, #ffffff 22%);
+    background:
+        radial-gradient(circle at 12% -18%, rgba(59, 130, 246, 0.2), transparent 42%),
+        radial-gradient(circle at 96% -30%, rgba(16, 185, 129, 0.14), transparent 45%),
+        rgba(255, 255, 255, 0.02);
+    box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.my-links-page .my-links-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.025), transparent 35%);
 }
 
 .my-links-page .my-links-heading-wrapper {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: linear-gradient(120deg, rgba(59, 130, 246, 0.08), rgba(16, 185, 129, 0.05));
 }
 
 .my-links-page .my-links-header-row {
@@ -55,6 +82,7 @@
 .my-links-page .my-links-search-input:focus {
     border-color: var(--primary-color, #2563eb);
     background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
 .my-links-page .my-links-list {
@@ -83,13 +111,15 @@
     background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.2s ease;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .my-links-page .my-link-item:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.16);
 }
 
 .my-links-page .my-links-card-content {
@@ -192,12 +222,13 @@
     border-radius: 8px;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 160ms ease, background 160ms ease, color 160ms ease;
 }
 
 .my-links-page .my-link-action-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #60a5fa;
+    transform: translateY(-1px);
 }
 
 .my-links-page .my-link-action-btn.delete {
@@ -294,18 +325,37 @@
 }
 
 @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 640px) {
+    .my-links-page.my-links-workspace {
+        padding-inline: 0.75rem;
+        padding-block: 0.35rem 1rem;
+    }
+
+    .my-links-page .my-links-heading-wrapper {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
     .my-links-page .my-links-card-content {
         flex-direction: column;
     }
+
     .my-links-page .my-links-details {
         padding-right: 0;
         width: 100%;
     }
+
     .my-links-page .my-links-actions {
         width: 100%;
         justify-content: flex-end;
@@ -313,27 +363,81 @@
         border-top: 1px solid rgba(255, 255, 255, 0.05);
         margin-top: 0.25rem;
     }
+
     .my-links-page .my-links-header-row {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
+
+    .my-links-page .my-link-stats {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
 }
 
-.mylinks-page .empty-icon {
+@media (max-width: 420px) {
+    .my-links-page.my-links-workspace {
+        padding-inline: 0.5rem;
+        padding-block: 0.25rem 0.75rem;
+    }
+
+    .my-links-page .my-links-panel {
+        min-height: auto;
+        border-radius: 14px;
+    }
+
+    .my-links-page .my-links-heading-wrapper {
+        padding: 0.85rem;
+    }
+
+    .my-links-page .my-links-subtitle {
+        font-size: 0.86rem;
+    }
+
+    .my-links-page .my-links-search-input {
+        font-size: 0.88rem;
+        padding: 0.72rem 0.85rem 0.72rem 2.45rem;
+    }
+
+    .my-links-page .my-link-item {
+        padding: 0.9rem;
+    }
+
+    .my-links-page .my-link-short {
+        font-size: 0.95rem;
+        overflow-wrap: anywhere;
+    }
+
+    .my-links-page .my-link-original {
+        font-size: 0.82rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .my-links-page .my-link-stat-item {
+        font-size: 0.78rem;
+    }
+
+    .my-links-page .my-link-action-btn {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+.my-links-page .empty-icon {
     opacity: 0.2;
     margin-bottom: 1rem;
 }
 
-.mylinks-page .empty-text {
+.my-links-page .empty-text {
     font-size: 1.1rem;
 }
 
-.mylinks-page .empty-subtext {
+.my-links-page .empty-subtext {
     font-size: 0.9rem;
     margin-top: 0.5rem;
 }
 
-.mylinks-page .external-icon {
+.my-links-page .external-icon {
     opacity: 0.7;
 }
