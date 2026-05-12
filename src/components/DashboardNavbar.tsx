@@ -7,6 +7,7 @@ import {
     MoreVertical,
     Settings,
     Smartphone,
+    User,
     Link as LinkIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -71,8 +72,11 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         aria-haspopup="menu"
                         onClick={() => toggleMenu("profile")}
                     >
+                        <div className="profile-avatar">
+                            <User size={18} />
+                        </div>
                         <span>{displayName}</span>
-                        <MoreVertical size={16} />
+                        <MoreVertical size={14} className="profile-chevron" />
                     </button>
                     {openMenu === "profile" && (
                         <div
@@ -87,9 +91,11 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                                 <CreditCard size={16} />
                                 Billing / Subscription
                             </button>
+                            <div className="nav-dropdown-divider" role="separator" />
                             <button
                                 type="button"
                                 role="menuitem"
+                                className="logout-button"
                                 onClick={() => {
                                     dispatch(logout());
                                     navigate("/login", { replace: true });
