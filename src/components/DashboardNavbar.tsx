@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
     BarChart3,
-    Bell,
     CreditCard,
     LayoutDashboard,
     LogOut,
@@ -9,7 +8,6 @@ import {
     Settings,
     Smartphone,
     Link as LinkIcon,
-    Moon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -23,8 +21,8 @@ interface DashboardNavbarProps {
 const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Links", path: "/my-links", icon: LinkIcon },
-    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
+    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
 ];
 
 function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
@@ -58,28 +56,12 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         className={pathname === path ? "active" : undefined}
                     >
                         <Icon size={16} />
-                        {label}
+                        <span>{label}</span>
                     </Link>
                 ))}
             </nav>
 
             <div className="dashboard-actions">
-                <button
-                    className="nav-icon-btn"
-                    type="button"
-                    title="Notifications"
-                >
-                    <Bell size={18} />
-                </button>
-
-                <button
-                    className="nav-icon-btn"
-                    type="button"
-                    title="Toggle Theme"
-                >
-                    <Moon size={18} />
-                </button>
-
                 <div className="nav-menu-wrap">
                     <button
                         className="profile-button"
