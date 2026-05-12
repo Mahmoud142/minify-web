@@ -366,7 +366,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 420px) {
     .analytics.analytics-container {
         padding-inline: 0.5rem;
         gap: 1rem;
