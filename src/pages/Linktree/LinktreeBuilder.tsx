@@ -142,22 +142,9 @@ export default function LinktreeBuilder() {
                             placeholder="Tell the world about yourself..."
                         />
                     </div>
-                    <div
-                        className="lt-form-actions"
-                        style={{
-                            marginTop: "1rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "1rem",
-                        }}
-                    >
+                    <div className="lt-form-actions lt-profile-actions">
                         {profileSaveSuccess && (
-                            <span
-                                style={{
-                                    color: "#10b981",
-                                    fontSize: "0.875rem",
-                                }}
-                            >
+                            <span className="lt-save-success">
                                 Profile saved!
                             </span>
                         )}
@@ -177,38 +164,44 @@ export default function LinktreeBuilder() {
                         Links
                     </div>
                     <div className="lt-links-list">
-                        {links.map((link) => (
-                            <div key={link._id} className="lt-link-card">
-                                <div className="lt-link-header">
-                                    <GripVertical
-                                        size={18}
-                                        className="lt-drag-handle"
-                                    />
-                                    <button
-                                        className="lt-delete-btn"
-                                        onClick={() => removeLink(link._id)}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                                <div className="lt-link-inputs">
-                                    <input
-                                        type="text"
-                                        className="lt-input link-card-title-bold"
-                                        placeholder="Title"
-                                        value={link.title}
-                                        readOnly
-                                    />
-                                    <input
-                                        type="text"
-                                        className="lt-input link-card-url-faded"
-                                        placeholder="URL"
-                                        value={link.url}
-                                        readOnly
-                                    />
-                                </div>
+                        {links.length === 0 ? (
+                            <div className="lt-links-empty">
+                                <p>No links yet. Add your first one below.</p>
                             </div>
-                        ))}
+                        ) : (
+                            links.map((link) => (
+                                <div key={link._id} className="lt-link-card">
+                                    <div className="lt-link-header">
+                                        <GripVertical
+                                            size={18}
+                                            className="lt-drag-handle"
+                                        />
+                                        <button
+                                            className="lt-delete-btn"
+                                            onClick={() => removeLink(link._id)}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                    <div className="lt-link-inputs">
+                                        <input
+                                            type="text"
+                                            className="lt-input link-card-title-bold"
+                                            placeholder="Title"
+                                            value={link.title}
+                                            readOnly
+                                        />
+                                        <input
+                                            type="text"
+                                            className="lt-input link-card-url-faded"
+                                            placeholder="URL"
+                                            value={link.url}
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                     {isAddingLink ? (
                         <form className="lt-add-link-form" onSubmit={addLink}>
