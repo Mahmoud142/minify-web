@@ -1,52 +1,75 @@
+import { useEffect } from "react";
 import {
     TrendingUp,
     Globe,
     MousePointer2,
-    Calendar,
     Link2,
+    BarChart3,
+    CheckCircle2,
 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { fetchGlobalAnalytics } from "../features/analytics/analyticsSlice";
 import "./Analytics.css";
 
 export default function Analytics() {
-    // Mock data for demonstration
-    const topLinks = [
-        {
-            id: 1,
-            name: "Portfolio Website",
-            url: "minify.io/portfolio",
-            clicks: 1240,
-            color: "#3b82f6",
-        },
-        {
-            id: 2,
-            name: "Product Launch",
-            url: "minify.io/launch-2024",
-            clicks: 856,
-            color: "#8b5cf6",
-        },
-        {
-            id: 3,
-            name: "Special Offer",
-            url: "minify.io/discount",
-            clicks: 432,
-            color: "#ec4899",
-        },
-        {
-            id: 4,
-            name: "Newsletter Signup",
-            url: "minify.io/join",
-            clicks: 215,
-            color: "#10b981",
-        },
-    ];
+    const dispatch = useAppDispatch();
+    const { data, status, error } = useAppSelector((state) => state.analytics);
 
-    const topCountries = [
-        { country: "United States", clicks: 2450, percentage: 45 },
-        { country: "United Kingdom", clicks: 1200, percentage: 22 },
-        { country: "Germany", clicks: 850, percentage: 15 },
-        { country: "France", clicks: 420, percentage: 8 },
-        { country: "Canada", clicks: 310, percentage: 5 },
-    ];
+    useEffect(() => {
+        if (status === "idle") {
+            dispatch(fetchGlobalAnalytics());
+        }
+    }, [dispatch, status]);
+
+    if (status === "loading") {
+        return (
+            <div className="dashboard-workspace single-column-workspace">
+                <div className="analytics analytics-container">
+                    <div className="analytics-header">
+                        <h2>Analytics</h2>
+                    </div>
+                    <div className="empty-state">
+                        <p>Loading analytics...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === "failed") {
+        return (
+            <div className="dashboard-workspace single-column-workspace">
+                <div className="analytics analytics-container">
+                    <div className="analytics-header">
+                        <h2>Analytics</h2>
+                    </div>
+                    <div className="empty-state">
+                        <p>Error: {error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const totalClicks = data?.totalClicks || 0;
+    const topLocations = data?.topLocations || [];
+    const urls = data?.urls || [];
+    const sortedUrls = [...urls].sort((a, b) => b.totalClicks - a.totalClicks);
+    const topLink = sortedUrls[0] ?? null;
+    const topLinkShare =
+        topLink && totalClicks > 0
+            ? Math.round((topLink.totalClicks / totalClicks) * 100)
+            : 0;
+    const activeLinks = urls.filter((link) => link.isActive).length;
+    const inactiveLinks = urls.length - activeLinks;
+    const zeroClickLinks = urls.filter((link) => link.totalClicks === 0).length;
+
+    // Calculate best location
+    const topLocation = topLocations.length > 0 ? topLocations[0] : null;
+    const totalLocationClicks = topLocations.reduce(
+        (acc, loc) => acc + loc.count,
+        0,
+    );
 
     return (
         <div className="dashboard-workspace single-column-workspace">
@@ -58,14 +81,6 @@ export default function Analytics() {
                             Track your performance and understand your audience.
                         </p>
                     </div>
-                    <div
-                        className="glass-panel analytics-date-filter"
-                    >
-                        <Calendar size={16} color="var(--accent-primary)" />
-                        <span className="analytics-date-text">
-                            Last 30 Days
-                        </span>
-                    </div>
                 </div>
 
                 {/* Top Stats */}
@@ -75,44 +90,68 @@ export default function Analytics() {
                             <MousePointer2 size={24} />
                         </div>
                         <div className="stat-label">Total Clicks</div>
-                        <div className="stat-value">5,231</div>
+                        <div className="stat-value">
+                            {totalClicks.toLocaleString()}
+                        </div>
                         <div className="stat-trend trend-up">
                             <TrendingUp size={14} />
-                            <span>+12.5% vs last month</span>
+                            <span>Across all links</span>
                         </div>
                     </div>
 
                     <div className="glass-panel stat-card">
-                        <div
-                            className="stat-icon icon-purple"
-                        >
-                            <TrendingUp size={24} />
+                        <div className="stat-icon icon-blue-alt">
+                            <CheckCircle2 size={24} />
                         </div>
-                        <div className="stat-label">Best Average Clicks</div>
-                        <div className="stat-value">
-                            42.5
-                            <span className="stat-value-suffix">
-                                / day
+                        <div className="stat-label">Links Health</div>
+                        <div className="stat-value">{activeLinks}</div>
+                        <div className="stat-trend trend-neutral">
+                            <span>
+                                {inactiveLinks} inactive • {zeroClickLinks}{" "}
+                                zero-click
                             </span>
                         </div>
-                        <div className="stat-trend trend-up">
-                            <TrendingUp size={14} />
-                            <span>Peak performance reached</span>
-                        </div>
                     </div>
 
                     <div className="glass-panel stat-card">
-                        <div
-                            className="stat-icon icon-green"
-                        >
+                        <div className="stat-icon icon-green">
                             <Globe size={24} />
                         </div>
                         <div className="stat-label">Top Location</div>
-                        <div className="stat-value">USA</div>
+                        <div className="stat-value">
+                            {topLocation ? topLocation.country : "N/A"}
+                        </div>
                         <div className="stat-trend trend-neutral">
-                            <span>Dominating 45% of traffic</span>
+                            <span>
+                                {topLocation && totalLocationClicks > 0
+                                    ? `Dominating ${Math.round((topLocation.count / totalLocationClicks) * 100)}% of traffic`
+                                    : "No location data"}
+                            </span>
                         </div>
                     </div>
+
+                    <div className="glass-panel stat-card">
+                        <div className="stat-icon icon-purple">
+                            <BarChart3 size={24} />
+                        </div>
+                        <div className="stat-label">Top Link Concentration</div>
+                        <div className="stat-value">{topLinkShare}%</div>
+                        <div className="stat-trend trend-neutral">
+                            <span>
+                                {topLink
+                                    ? `${topLink.shortCode} drives most traffic`
+                                    : "No link performance data"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="glass-panel concentration-insight">
+                    <p>
+                        {topLink && totalClicks > 0
+                            ? `Concentration insight: your top link contributes ${topLinkShare}% of all clicks (${topLink.totalClicks.toLocaleString()} out of ${totalClicks.toLocaleString()}).`
+                            : "Concentration insight: not enough click data yet."}
+                    </p>
                 </div>
 
                 <div className="analytics-main-grid">
@@ -120,27 +159,52 @@ export default function Analytics() {
                     <div className="glass-panel analytics-panel">
                         <div className="panel-title">
                             <Link2 size={20} color="var(--accent-primary)" />
-                            Top Performing Links
+                            Link Leaderboard
                         </div>
                         <div className="links-list">
-                            {topLinks.map((link) => (
-                                <div key={link.id} className="link-item">
-                                    <div className="link-info">
-                                        <span className="link-name">
-                                            {link.name}
-                                        </span>
-                                        <span className="link-url">
-                                            {link.url}
-                                        </span>
-                                    </div>
-                                    <div className="link-stats">
-                                        <div className="clicks-badge">
-                                            {link.clicks.toLocaleString()}{" "}
-                                            clicks
+                            {urls.length === 0 ? (
+                                <p className="text-secondary text-sm">
+                                    No links found
+                                </p>
+                            ) : (
+                                sortedUrls.map((link, index) => {
+                                    const share =
+                                        totalClicks > 0
+                                            ? Math.round(
+                                                  (link.totalClicks /
+                                                      totalClicks) *
+                                                      100,
+                                              )
+                                            : 0;
+                                    return (
+                                        <div
+                                            key={link._id}
+                                            className="link-item"
+                                        >
+                                            <div className="link-info">
+                                                <span className="link-name leaderboard-name">
+                                                    <span className="rank-badge">
+                                                        #{index + 1}
+                                                    </span>
+                                                    {link.shortCode}
+                                                </span>
+                                                <span className="link-url">
+                                                    {link.originalUrl}
+                                                </span>
+                                            </div>
+                                            <div className="link-stats">
+                                                <div className="clicks-badge">
+                                                    {link.totalClicks.toLocaleString()}{" "}
+                                                    clicks
+                                                </div>
+                                                <div className="share-badge">
+                                                    {share}% share
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            ))}
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
 
@@ -151,22 +215,41 @@ export default function Analytics() {
                             Audience by Country
                         </div>
                         <div className="countries-list">
-                            {topCountries.map((item, index) => (
-                                <div key={index} className="country-item">
-                                    <div className="country-info">
-                                        <span>{item.country}</span>
-                                        <span>{item.percentage}%</span>
-                                    </div>
-                                    <div className="country-bar-container">
+                            {topLocations.length === 0 ? (
+                                <p className="text-secondary text-sm">
+                                    No location data
+                                </p>
+                            ) : (
+                                topLocations.map((item, index) => {
+                                    const percentage =
+                                        totalLocationClicks > 0
+                                            ? Math.round(
+                                                  (item.count /
+                                                      totalLocationClicks) *
+                                                      100,
+                                              )
+                                            : 0;
+                                    return (
                                         <div
-                                            className="country-bar-fill"
-                                            style={{
-                                                width: `${item.percentage}%`,
-                                            }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            ))}
+                                            key={index}
+                                            className="country-item"
+                                        >
+                                            <div className="country-info">
+                                                <span>{item.country}</span>
+                                                <span>{percentage}%</span>
+                                            </div>
+                                            <div className="country-bar-container">
+                                                <div
+                                                    className="country-bar-fill"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                    }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>
