@@ -1,217 +1,193 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-    Link2,
-    Trash2,
-    Copy,
-    ExternalLink,
-    Calendar,
-    BarChart2,
-    Search,
+    Link2, Trash2, Copy, Check, ExternalLink,
+    Calendar, BarChart2, Search, Loader2, MousePointerClick,
+    AlertTriangle,
 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { selectUrls, selectUrlsStatus } from "../features/urls/urlSelectors";
+import { fetchMyUrls, deleteUrl } from "../features/urls/urlSlice";
 import "./MyLinks.css";
-import { urlApi } from "../features/urls/urlApi";
-import type { UrlData } from "../features/urls/urlTypes";
+
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+
+function fmt(n: number) {
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toLocaleString();
+}
 
 export default function MyLinks() {
-    const [links, setLinks] = useState<UrlData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const urls = useAppSelector(selectUrls);
+    const urlsStatus = useAppSelector(selectUrlsStatus);
+
     const [searchTerm, setSearchTerm] = useState("");
+    const [copiedId, setCopiedId] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-    const fetchUrls = async () => {
-        try {
-            setIsLoading(true);
-            const response = await urlApi.getMyUrls();
-            const payload = response as unknown as { urls?: UrlData[] };
-            setLinks(payload.urls || response.data?.urls || []);
-        } catch (error) {
-            console.error("Failed to fetch URLs", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchUrls();
-    }, []);
+        if (urlsStatus === "idle") dispatch(fetchMyUrls());
+    }, [dispatch, urlsStatus]);
 
-    const confirmDelete = async () => {
+    const copyToClipboard = (value: string, id: string) => {
+        navigator.clipboard.writeText(value);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const confirmDelete = () => {
         if (deleteConfirmId) {
-            try {
-                await urlApi.deleteUrl(deleteConfirmId);
-                setLinks(links.filter((link) => link._id !== deleteConfirmId));
-                setDeleteConfirmId(null);
-            } catch (error) {
-                console.error("Failed to delete URL", error);
-            }
+            dispatch(deleteUrl(deleteConfirmId));
+            setDeleteConfirmId(null);
         }
     };
 
-    const copyToClipboard = (value: string) => {
-        navigator.clipboard.writeText(value);
-    };
-
-    const filteredLinks = links.filter(
-        (link) =>
-            link.shortCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            link.originalUrl.toLowerCase().includes(searchTerm.toLowerCase()),
+    const filtered = urls.filter(
+        (l) =>
+            l.shortCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            l.originalUrl.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
+    const isLoading = urlsStatus === "loading" && urls.length === 0;
+
     return (
-        <div className="dashboard-workspace my-links-workspace my-links-page">
-            <section className="panel my-links-panel">
-                <div className="panel-heading my-links-heading-wrapper">
-                    <div className="my-links-header-row">
-                        <div>
-                            <h2>My Links</h2>
-                            <p className="my-links-subtitle">
-                                Manage all your shortened links, copy them, and
-                                track their performance.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="my-links-search-wrapper">
-                        <Search size={18} className="my-links-search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Search your links..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="my-links-search-input"
-                        />
-                    </div>
+        <div className="ml-page">
+            {/* Header */}
+            <div className="ml-header">
+                <div className="ml-header-text">
+                    <h1>My Links</h1>
+                    <p>Manage all your shortened links and track performance.</p>
                 </div>
+                <div className="ml-search-box">
+                    <Search size={16} className="ml-search-ico" />
+                    <input
+                        type="text"
+                        placeholder="Search links…"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
 
-                <div className="my-links-list">
-                    {isLoading ? (
-                        <div className="my-links-empty">
-                            <p className="empty-text">Loading...</p>
-                        </div>
-                    ) : filteredLinks.length === 0 ? (
-                        <div className="my-links-empty">
-                            <Link2 size={48} className="empty-icon" />
-                            <p className="empty-text">No links found.</p>
-                            {searchTerm && (
-                                <p className="empty-subtext">
-                                    Try adjusting your search term.
-                                </p>
-                            )}
-                        </div>
-                    ) : (
-                        filteredLinks.map((link) => {
-                            const fullShortUrl = `${import.meta.env.VITE_API_BASE_URL || ""}/url/${link.shortCode}`;
-                            return (
-                                <div key={link._id} className="my-link-item">
-                                    <div className="my-links-card-content">
-                                        <div className="my-links-details">
-                                            <div className="my-link-short-wrapper">
-                                                <a
-                                                    href={fullShortUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="my-link-short"
-                                                >
-                                                    {fullShortUrl}
-                                                    <ExternalLink
-                                                        size={14}
-                                                        className="external-icon"
-                                                    />
-                                                </a>
-                                                <span
-                                                    className={`my-link-status ${link.isActive ? "active" : "paused"}`}
-                                                >
-                                                    {link.isActive
-                                                        ? "Active"
-                                                        : "Paused"}
-                                                </span>
-                                            </div>
+            {/* Count Badge */}
+            {!isLoading && (
+                <div className="ml-count">
+                    <span>{filtered.length} {filtered.length === 1 ? "link" : "links"}</span>
+                    {searchTerm && <span className="ml-count-filter">matching "{searchTerm}"</span>}
+                </div>
+            )}
 
-                                            <a
-                                                href={link.originalUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="my-link-original"
-                                            >
-                                                {link.originalUrl}
-                                            </a>
+            {/* Links List */}
+            <div className="ml-list">
+                {isLoading ? (
+                    <div className="ml-empty">
+                        <Loader2 size={28} className="spin" />
+                        <p>Loading your links…</p>
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div className="ml-empty">
+                        <Link2 size={40} />
+                        <p>No links found</p>
+                        {searchTerm && <span>Try adjusting your search term.</span>}
+                    </div>
+                ) : (
+                    filtered.map((link) => {
+                        const shortUrl = `${API_BASE}/url/${link.shortCode}`;
+                        return (
+                            <div 
+                                key={link._id} 
+                                className="ml-card"
+                                onClick={() => navigate(`/link/${link._id}`)}
+                            >
+                                <div className="ml-card-body">
+                                    <div className="ml-card-top">
+                                        <a
+                                            href={shortUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="ml-short-url"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {API_BASE.replace(/^https?:\/\//, "")}/url/{link.shortCode}
+                                            <ExternalLink size={12} />
+                                        </a>
+                                        <span className={`ml-badge ${link.isActive ? "active" : "paused"}`}>
+                                            {link.isActive ? "Active" : "Paused"}
+                                        </span>
+                                    </div>
 
-                                            <div className="my-link-stats">
-                                                <span className="my-link-stat-item">
-                                                    <BarChart2
-                                                        size={16}
-                                                        color="#60a5fa"
-                                                    />
-                                                    <strong>
-                                                        {link.totalClicks?.toLocaleString() ||
-                                                            0}
-                                                    </strong>{" "}
-                                                    clicks
-                                                </span>
-                                                <span className="my-link-stat-item">
-                                                    <Calendar size={16} />
-                                                    {new Date(
-                                                        link.createdAt,
-                                                    ).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        </div>
+                                    <a
+                                        href={link.originalUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="ml-orig-url"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {link.originalUrl}
+                                    </a>
 
-                                        <div className="my-links-actions">
-                                            <button
-                                                onClick={() =>
-                                                    copyToClipboard(
-                                                        fullShortUrl,
-                                                    )
-                                                }
-                                                className="my-link-action-btn"
-                                                title="Copy link"
-                                            >
-                                                <Copy size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    setDeleteConfirmId(link._id)
-                                                }
-                                                className="my-link-action-btn delete"
-                                                title="Delete link"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
+                                    <div className="ml-meta">
+                                        <span className="ml-meta-item">
+                                            <MousePointerClick size={14} />
+                                            <strong>{fmt(link.totalClicks)}</strong> clicks
+                                        </span>
+                                        <span className="ml-meta-item">
+                                            <Calendar size={14} />
+                                            {new Date(link.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                        </span>
+                                        {link.expiresAt && (
+                                            <span className="ml-meta-item ml-expires">
+                                                <BarChart2 size={14} />
+                                                Expires {new Date(link.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
-                            );
-                        })
-                    )}
-                </div>
-            </section>
 
+                                <div className="ml-actions">
+                                    <button
+                                        type="button"
+                                        className="ml-action-btn"
+                                        title="Copy short URL"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            copyToClipboard(shortUrl, link._id);
+                                        }}
+                                    >
+                                        {copiedId === link._id ? <Check size={16} /> : <Copy size={16} />}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="ml-action-btn danger"
+                                        title="Delete link"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setDeleteConfirmId(link._id);
+                                        }}
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* Delete Confirmation Modal */}
             {deleteConfirmId && (
-                <div className="my-links-modal-overlay">
-                    <div className="my-links-modal">
-                        <div className="my-links-modal-icon">
-                            <Trash2 color="#ef4444" size={24} />
+                <div className="ml-overlay" onClick={() => setDeleteConfirmId(null)}>
+                    <div className="ml-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="ml-modal-icon">
+                            <AlertTriangle size={24} />
                         </div>
-                        <h3>Delete Link?</h3>
-                        <p>
-                            Are you sure you want to delete this link? This
-                            action cannot be undone and analytics will be lost.
-                        </p>
-                        <div className="my-links-modal-actions">
-                            <button
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="my-links-modal-btn cancel"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmDelete}
-                                className="my-links-modal-btn confirm"
-                            >
-                                Delete
-                            </button>
+                        <h3>Delete this link?</h3>
+                        <p>This action cannot be undone. All analytics data for this link will be permanently deleted.</p>
+                        <div className="ml-modal-btns">
+                            <button type="button" className="ml-modal-btn cancel" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+                            <button type="button" className="ml-modal-btn delete" onClick={confirmDelete}>Delete</button>
                         </div>
                     </div>
                 </div>
