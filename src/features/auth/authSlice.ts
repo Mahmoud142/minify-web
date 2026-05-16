@@ -154,6 +154,12 @@ const authSlice = createSlice({
             };
             state.passwordResetStatus = "idle";
         },
+        updateUser(state, action) {
+            state.user = action.payload;
+            if (state.token) {
+                persistAuthSession(action.payload, state.token);
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -251,7 +257,11 @@ const authSlice = createSlice({
     },
 });
 
-export const { clearAuthFeedback, clearPasswordResetFlow, logout } =
-    authSlice.actions;
+export const { 
+    clearAuthFeedback, 
+    clearPasswordResetFlow, 
+    logout,
+    updateUser
+} = authSlice.actions;
 
 export default authSlice.reducer;
