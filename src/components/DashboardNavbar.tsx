@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
     BarChart3,
-    CreditCard,
     LayoutDashboard,
     LogOut,
     MoreVertical,
@@ -92,10 +91,6 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                                 <Settings size={16} />
                                 Account Settings
                             </Link>
-                            <button type="button" role="menuitem">
-                                <CreditCard size={16} />
-                                Billing / Subscription
-                            </button>
                             <div className="nav-dropdown-divider" role="separator" />
                             <button
                                 type="button"
