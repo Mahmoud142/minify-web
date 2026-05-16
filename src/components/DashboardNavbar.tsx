@@ -7,6 +7,7 @@ import {
     Settings,
     Smartphone,
     User,
+    ChevronDown,
     Link as LinkIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -72,10 +73,10 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         onClick={() => toggleMenu("profile")}
                     >
                         <div className="profile-avatar">
-                            <User size={18} />
+                            {user?.name?.charAt(0).toUpperCase() || <User size={18} />}
                         </div>
                         <span>{displayName}</span>
-                        <MoreVertical size={14} className="profile-chevron" />
+                        <ChevronDown size={14} className="profile-chevron" />
                     </button>
                     {openMenu === "profile" && (
                         <div
