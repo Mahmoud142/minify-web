@@ -3,7 +3,6 @@ import {
     BarChart3,
     LayoutDashboard,
     LogOut,
-    MoreVertical,
     Settings,
     Smartphone,
     User,
@@ -23,7 +22,7 @@ const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Links", path: "/my-links", icon: LinkIcon },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
-    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
+    { label: "Bio Page", path: "/linktree-builder", icon: Smartphone },
 ];
 
 function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
