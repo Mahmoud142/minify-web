@@ -8,6 +8,7 @@ export interface LinktreeData {
     _id: string;
     userId: string | Record<string, unknown>;
     username: string;
+    bio?: string;
     links: LinktreeLink[];
     createdAt?: string;
     updatedAt?: string;
@@ -18,8 +19,10 @@ export interface GetLinktreeResponse {
     linktree: LinktreeData;
 }
 
-export interface UpdateUsernameRequest {
-    username: string;
+export interface UpdateProfileRequest {
+    username?: string;
+    bio?: string;
+    links?: { _id: string; title: string }[];
 }
 
 export interface AddLinkRequest {
