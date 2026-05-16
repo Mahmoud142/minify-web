@@ -83,10 +83,15 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                             className="nav-dropdown profile-dropdown"
                             role="menu"
                         >
-                            <button type="button" role="menuitem">
+                            <Link 
+                                to="/profile" 
+                                className="nav-dropdown-item" 
+                                role="menuitem"
+                                onClick={() => setOpenMenu(null)}
+                            >
                                 <Settings size={16} />
                                 Account Settings
-                            </button>
+                            </Link>
                             <button type="button" role="menuitem">
                                 <CreditCard size={16} />
                                 Billing / Subscription

@@ -1,0 +1,215 @@
+.profile-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+    animation: profileFadeIn 0.5s ease-out;
+}
+
+.profile-header {
+    margin-bottom: 2.5rem;
+}
+
+.profile-header h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #818cf8 50%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.profile-header p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-card {
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+}
+
+.profile-card-header svg {
+    color: #818cf8;
+}
+
+.profile-card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.profile-card-header.danger svg {
+    color: #f87171;
+}
+
+.profile-card-header.danger h2 {
+    color: #f87171;
+}
+
+.profile-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.profile-field {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.profile-field label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #94a3b8;
+    padding-left: 0.25rem;
+}
+
+.profile-field input {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    color: #f1f5f9;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.profile-field input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.profile-input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-input-icon svg {
+    position: absolute;
+    left: 1rem;
+    color: #64748b;
+}
+
+.profile-input-icon input {
+    width: 100%;
+    padding-left: 2.75rem;
+}
+
+.profile-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+}
+
+.profile-secondary-btn {
+    padding: 0.85rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #cbd5e1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.status-card {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(34, 211, 238, 0.03)) !important;
+    border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.status-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.status-dot.active {
+    background: #10b981;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 5px;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 1.5rem 0;
+}
+
+.upgrade-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.danger-card {
+    background: rgba(239, 68, 68, 0.03) !important;
+    border-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.delete-account-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    color: #f87171;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+@keyframes profileFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.spin {
+    animation: profileSpin 1s linear infinite;
+}
+
+@keyframes profileSpin {
+    to { transform: rotate(360deg); }
+}
