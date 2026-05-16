@@ -1,312 +1,271 @@
-import { useState } from "react";
-import { BarChart3, Copy, Link2, QrCode } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+    BarChart3, Copy, Check, Link2, QrCode, TrendingUp,
+    Globe, MousePointerClick, ExternalLink, Trash2,
+    TreePine, ArrowRight, Zap, Loader2, AlertCircle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { selectAuthUser } from "../features/auth/authSelectors";
+import { selectUrls, selectUrlsStatus, selectShortenStatus, selectShortenError, selectLastShortenedUrl } from "../features/urls/urlSelectors";
+import { fetchMyUrls, shortenUrl, deleteUrl, clearShortenState } from "../features/urls/urlSlice";
+import { selectAnalyticsData, selectAnalyticsStatus } from "../features/analytics/analyticsSelectors";
+import { fetchGlobalAnalytics } from "../features/analytics/analyticsSlice";
+import { selectLinktree, selectLinktreeStatus } from "../features/linktree/linktreeSelectors";
+import { fetchMyLinktree } from "../features/linktree/linktreeSlice";
+import "./Dashboard.css";
 
-interface UrlRecord {
-    id: string;
-    original: string;
-    short: string;
-    clicks: number;
-    createdAt: string;
-    status: "Active" | "Paused";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+
+function fmt(n: number) {
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toLocaleString();
 }
 
-const countryStats = [
-    { country: "United States", city: "New York", clicks: 1280, percent: 74 },
-    { country: "Egypt", city: "Cairo", clicks: 920, percent: 53 },
-    { country: "United Kingdom", city: "London", clicks: 610, percent: 35 },
-    { country: "Germany", city: "Berlin", clicks: 430, percent: 25 },
-];
+function timeAgo(d: string) {
+    const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+    if (m < 1) return "Just now";
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+}
 
-function Dashboard() {
+function getGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+}
+
+export default function Dashboard() {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
+    // Auth
+    const user = useAppSelector(selectAuthUser);
+
+    // URLs
+    const urls = useAppSelector(selectUrls);
+    const urlsStatus = useAppSelector(selectUrlsStatus);
+    const shortenStatus = useAppSelector(selectShortenStatus);
+    const shortenError = useAppSelector(selectShortenError);
+    const lastShortenedUrl = useAppSelector(selectLastShortenedUrl);
+
+    // Analytics
+    const analytics = useAppSelector(selectAnalyticsData);
+    const analyticsStatus = useAppSelector(selectAnalyticsStatus);
+
+    // Linktree
+    const linktree = useAppSelector(selectLinktree);
+    const linktreeStatus = useAppSelector(selectLinktreeStatus);
+
+    // Local form state
     const [longUrl, setLongUrl] = useState("");
-    const [customAlias, setCustomAlias] = useState("");
-    const [useCustomAlias, setUseCustomAlias] = useState(false);
+    const [alias, setAlias] = useState("");
+    const [useAlias, setUseAlias] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [copiedShort, setCopiedShort] = useState(false);
 
-    const [urls, setUrls] = useState<UrlRecord[]>([
-        {
-            id: "url-1",
-            original: "https://minify.app/campaigns/spring-launch-analytics",
-            short: "https://mnf.ee/spring",
-            clicks: 2480,
-            createdAt: "May 5, 2026",
-            status: "Active",
-        },
-        {
-            id: "url-2",
-            original:
-                "https://portfolio.example.com/case-studies/mobile-redesign",
-            short: "https://mnf.ee/portfolio",
-            clicks: 1634,
-            createdAt: "May 2, 2026",
-            status: "Active",
-        },
-        {
-            id: "url-3",
-            original: "https://shop.example.com/products/creator-bundle",
-            short: "https://mnf.ee/bundle",
-            clicks: 802,
-            createdAt: "Apr 28, 2026",
-            status: "Paused",
-        },
-    ]);
+    // Fetch data on mount
+    useEffect(() => {
+        if (urlsStatus === "idle") dispatch(fetchMyUrls());
+        if (analyticsStatus === "idle") dispatch(fetchGlobalAnalytics());
+        if (linktreeStatus === "idle") dispatch(fetchMyLinktree());
+    }, [dispatch, urlsStatus, analyticsStatus, linktreeStatus]);
 
-    const copyToClipboard = (value: string) => {
-        navigator.clipboard.writeText(value);
+    const copy = (val: string, id: string) => {
+        navigator.clipboard.writeText(val);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleCreateShortLink = (event: React.FormEvent) => {
-        event.preventDefault();
+    const copyShortened = () => {
+        if (!lastShortenedUrl) return;
+        navigator.clipboard.writeText(lastShortenedUrl);
+        setCopiedShort(true);
+        setTimeout(() => setCopiedShort(false), 2000);
+    };
+
+    const handleShorten = (e: React.FormEvent) => {
+        e.preventDefault();
         if (!longUrl.trim()) return;
-
-        const alias =
-            useCustomAlias && customAlias.trim()
-                ? customAlias.trim()
-                : Math.random().toString(36).slice(2, 8);
-        const short = `https://mnf.ee/${alias}`;
-        const newUrl: UrlRecord = {
-            id: Date.now().toString(),
-            original: longUrl,
-            short,
-            clicks: 0,
-            createdAt: "May 5, 2026",
-            status: "Active",
-        };
-
-        setUrls((currentUrls) => [newUrl, ...currentUrls]);
+        const payload: { originalUrl: string; shortCode?: string } = { originalUrl: longUrl.trim() };
+        if (useAlias && alias.trim()) payload.shortCode = alias.trim();
+        dispatch(shortenUrl(payload));
         setLongUrl("");
-        setCustomAlias("");
+        setAlias("");
     };
+
+    const handleDelete = (id: string) => {
+        dispatch(deleteUrl(id));
+    };
+
+    // Derived values
+    const totalClicks = analytics?.totalClicks ?? urls.reduce((s, u) => s + u.totalClicks, 0);
+    const topLocations = analytics?.topLocations ?? [];
+    const activeLinks = urls.filter(u => u.isActive).length;
+    const firstName = user?.name?.split(" ")[0] || "there";
 
     return (
-        <div className="dashboard-workspace">
-            <div className="dashboard-primary">
-                <section className="shortener-panel panel">
-                    <div className="panel-heading">
-                        <div>
-                            <h2>Shorten Link</h2>
-                        </div>
-                        <QrCode size={22} />
-                    </div>
+        <div className="dash">
+            {/* Hero */}
+            <section className="dash-hero">
+                <div>
+                    <p className="dash-eyebrow"><Zap size={14} />{getGreeting()}, {firstName}</p>
+                    <h1>Dashboard</h1>
+                    <p className="dash-subtitle">Manage links, track performance, grow your audience.</p>
+                </div>
+            </section>
 
-                    <form
-                        onSubmit={handleCreateShortLink}
-                        className="dashboard-form"
-                    >
-                        <div className="form-field destination-field">
-                            <label htmlFor="longUrl">URL</label>
-                            <input
-                                id="longUrl"
-                                type="url"
-                                placeholder="https://example.com/very/long/link"
-                                value={longUrl}
-                                onChange={(event) =>
-                                    setLongUrl(event.target.value)
-                                }
-                                required
-                            />
-                        </div>
+            {/* Stat Cards */}
+            <section className="dash-stats">
+                <div className="stat-card"><div className="stat-icon si-blue"><MousePointerClick size={20} /></div><div><strong>{fmt(totalClicks)}</strong><span>Total Clicks</span></div></div>
+                <div className="stat-card"><div className="stat-icon si-teal"><Link2 size={20} /></div><div><strong>{urls.length}</strong><span>Total Links</span></div></div>
+                <div className="stat-card"><div className="stat-icon si-green"><Zap size={20} /></div><div><strong>{activeLinks}</strong><span>Active</span></div></div>
+                <div className="stat-card"><div className="stat-icon si-amber"><Globe size={20} /></div><div><strong>{topLocations.length}</strong><span>Countries</span></div></div>
+            </section>
 
-                        <div className="custom-option">
-                            <label
-                                className="toggle-row"
-                                htmlFor="useCustomAlias"
-                            >
-                                <input
-                                    id="useCustomAlias"
-                                    type="checkbox"
-                                    checked={useCustomAlias}
-                                    onChange={(event) =>
-                                        setUseCustomAlias(event.target.checked)
-                                    }
-                                />
-                                <span />
-                                Custom short link
-                            </label>
-                        </div>
+            {/* Grid */}
+            <div className="dash-grid">
+                {/* LEFT */}
+                <div className="dash-left">
+                    {/* Shorten */}
+                    <section className="card">
+                        <div className="card-head"><div className="card-title"><QrCode size={18} /><h2>Shorten Link</h2></div></div>
+                        <form onSubmit={handleShorten} className="shorten-form">
+                            <div className="field">
+                                <label htmlFor="longUrl">Destination URL</label>
+                                <div className="input-box"><Link2 size={15} className="input-ico" /><input id="longUrl" type="url" placeholder="https://example.com/your-long-url" value={longUrl} onChange={e => setLongUrl(e.target.value)} required /></div>
+                            </div>
+                            <label className="toggle" htmlFor="useAlias"><input id="useAlias" type="checkbox" checked={useAlias} onChange={e => setUseAlias(e.target.checked)} /><span className="track" />Custom alias</label>
+                            {useAlias && (
+                                <div className="field">
+                                    <label htmlFor="alias">Custom alias</label>
+                                    <div className="alias-box"><span className="alias-pre">{API_BASE}/url/</span><input id="alias" placeholder="my-brand" value={alias} onChange={e => setAlias(e.target.value)} /></div>
+                                </div>
+                            )}
+                            {shortenError && <div className="form-alert error"><AlertCircle size={15} />{shortenError}</div>}
+                            <button className="btn-primary" type="submit" disabled={shortenStatus === "loading"}>
+                                {shortenStatus === "loading" ? <Loader2 size={16} className="spin" /> : <Zap size={16} />}
+                                {shortenStatus === "loading" ? "Creating..." : "Generate link"}
+                            </button>
+                        </form>
 
-                        {useCustomAlias && (
-                            <div className="form-field alias-field">
-                                <label htmlFor="customAlias">
-                                    Custom alias
-                                </label>
-                                <div className="alias-row">
-                                    <span>mnf.ee/</span>
-                                    <input
-                                        id="customAlias"
-                                        type="text"
-                                        placeholder="my-portfolio"
-                                        value={customAlias}
-                                        onChange={(event) =>
-                                            setCustomAlias(event.target.value)
-                                        }
-                                    />
+                        {/* Shorten success banner */}
+                        {shortenStatus === "succeeded" && lastShortenedUrl && (
+                            <div className="shorten-success">
+                                <div className="success-top"><Check size={15} /><span>Link created!</span></div>
+                                <div className="success-row">
+                                    <a href={lastShortenedUrl} target="_blank" rel="noopener noreferrer" className="success-url">{lastShortenedUrl}</a>
+                                    <button type="button" className="icon-btn" onClick={copyShortened}>{copiedShort ? <Check size={14} /> : <Copy size={14} />}</button>
+                                    <button type="button" className="btn-ghost" onClick={() => dispatch(clearShortenState())}>Dismiss</button>
                                 </div>
                             </div>
                         )}
+                    </section>
 
-                        <button className="primary-action" type="submit">
-                            <Link2 size={18} />
-                            Generate link
-                        </button>
-                    </form>
-                </section>
-
-                <section className="panel" id="my-links">
-                    <div className="panel-heading">
-                        <div>
-                            <h2>My Links</h2>
+                    {/* Recent Links */}
+                    <section className="card">
+                        <div className="card-head">
+                            <div className="card-title"><Link2 size={18} /><h2>Recent Links</h2></div>
+                            {urls.length > 3 && <button className="btn-ghost" type="button" onClick={() => navigate("/my-links")}>View all<ArrowRight size={14} /></button>}
                         </div>
-                        <Link2 size={22} />
-                    </div>
-                    <div
-                        className="metrics-list dashboard-metrics-grid"
-                    >
-                        {urls.slice(0, 3).map((url) => (
-                            <div
-                                key={url.id}
-                                className="dashboard-url-card"
-                            >
-                                <div
-                                    className="dashboard-url-info"
-                                >
-                                    <span
-                                        className="dashboard-url-short"
-                                    >
-                                        {url.short}
-                                    </span>
-                                    <span
-                                        className="dashboard-url-original"
-                                        title={url.original}
-                                    >
-                                        {url.original}
-                                    </span>
-                                    <span
-                                        className="dashboard-url-clicks"
-                                    >
-                                        {url.clicks} clicks
-                                    </span>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => copyToClipboard(url.short)}
-                                    className="dashboard-copy-btn"
-                                    title="Copy short URL"
-                                >
-                                    <Copy size={18} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </section>
 
-                <section className="panel" id="linktree">
-                    <div className="panel-heading">
-                        <div>
-                            <h2>Linktree Builder</h2>
-                        </div>
-                    </div>
-                    <div className="dashboard-linktree-card">
-                        <p className="dashboard-linktree-title">
-                            batmant's Linktree
-                        </p>
-                        <div className="dashboard-linktree-flex">
-                            <a
-                                href="#"
-                                className="dashboard-linktree-url"
-                            >
-                                linktr.ee/batmant
-                            </a>
-                            <button
-                                className="dashboard-linktree-edit-btn"
-                            >
-                                Edit
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <aside
-                className="dashboard-sidebar"
-                aria-label="Dashboard insights"
-            >
-                <section className="panel" id="analytics">
-                    <div className="panel-heading dashboard-analytics-heading">
-                        <div>
-                            <h2>Analytics Overview</h2>
-                        </div>
-                        <BarChart3 size={22} />
-                    </div>
-
-                    <div className="dashboard-analytics-grid">
-                        <div>
-                            <h3 className="dashboard-analytics-title">
-                                Top Visited Links
-                            </h3>
-                            <div className="dashboard-analytics-list">
-                                {[...urls]
-                                    .sort((a, b) => b.clicks - a.clicks)
-                                    .slice(0, 4)
-                                    .map((url) => (
-                                        <div key={url.id} className="dashboard-analytics-item">
-                                            <div>
-                                                <a href={url.short} className="dashboard-analytics-link">
-                                                    {url.short.replace(
-                                                        "https://",
-                                                        "",
-                                                    )}
+                        {urlsStatus === "loading" && urls.length === 0 ? (
+                            <div className="empty-state"><Loader2 size={22} className="spin" /><span>Loading links...</span></div>
+                        ) : urls.length === 0 ? (
+                            <div className="empty-state"><Link2 size={28} /><p>No links yet</p><span>Create your first short link above!</span></div>
+                        ) : (
+                            <div className="links-list">
+                                {urls.slice(0, 5).map(u => (
+                                    <div key={u._id} className="link-row">
+                                        <div className="link-info">
+                                            <div className="link-top">
+                                                <a href={`${API_BASE}/url/${u.shortCode}`} target="_blank" rel="noopener noreferrer" className="link-short">
+                                                    {API_BASE.replace(/^https?:\/\//, "")}/url/{u.shortCode}<ExternalLink size={11} />
                                                 </a>
-                                                <span className="dashboard-analytics-original">
-                                                    {url.original.substring(
-                                                        0,
-                                                        30,
-                                                    )}
-                                                    ...
-                                                </span>
+                                                <span className={`badge ${u.isActive ? "b-active" : "b-inactive"}`}>{u.isActive ? "Active" : "Inactive"}</span>
                                             </div>
-                                            <div className="dashboard-analytics-clicks">
-                                                {url.clicks.toLocaleString()}
-                                            </div>
+                                            <span className="link-orig" title={u.originalUrl}>{u.originalUrl}</span>
+                                            <div className="link-meta"><span><MousePointerClick size={12} />{fmt(u.totalClicks)} clicks</span><span>{timeAgo(u.createdAt)}</span></div>
                                         </div>
-                                    ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="dashboard-analytics-title">
-                                Top Locations
-                            </h3>
-                            <div className="dashboard-location-list">
-                                {countryStats.map((item) => (
-                                    <div key={item.country}>
-                                        <div className="dashboard-location-item">
-                                            <span>
-                                                {item.country}{" "}
-                                                <span className="dashboard-location-city">
-                                                    ({item.city})
-                                                </span>
-                                            </span>
-                                            <strong>
-                                                {item.clicks.toLocaleString()}
-                                            </strong>
-                                        </div>
-                                        <div className="dashboard-location-bar-bg">
-                                            <div
-                                                className="dashboard-location-bar-fill"
-                                                style={{
-                                                    width: `${item.percent}%`,
-                                                }}
-                                            />
+                                        <div className="link-actions">
+                                            <button type="button" className="icon-btn" title="Copy" onClick={() => copy(`${API_BASE}/url/${u.shortCode}`, u._id)}>{copiedId === u._id ? <Check size={15} /> : <Copy size={15} />}</button>
+                                            <button type="button" className="icon-btn danger" title="Delete" onClick={() => handleDelete(u._id)}><Trash2 size={15} /></button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                        )}
+                    </section>
+                </div>
+
+                {/* RIGHT */}
+                <aside className="dash-right">
+                    {/* Analytics */}
+                    <section className="card">
+                        <div className="card-head">
+                            <div className="card-title"><BarChart3 size={18} /><h2>Analytics</h2></div>
+                            <button className="btn-ghost" type="button" onClick={() => navigate("/analytics")}>Details<ArrowRight size={14} /></button>
                         </div>
-                    </div>
-                </section>
-            </aside>
+
+                        {analyticsStatus === "loading" ? (
+                            <div className="empty-state"><Loader2 size={22} className="spin" /><span>Loading analytics...</span></div>
+                        ) : (
+                            <>
+                                <h3 className="sec-title"><TrendingUp size={13} />Top links</h3>
+                                <div className="top-links">
+                                    {[...urls].sort((a, b) => b.totalClicks - a.totalClicks).slice(0, 4).map((u, i) => (
+                                        <div key={u._id} className="top-link">
+                                            <span className="rank">{i + 1}</span>
+                                            <div className="top-link-info"><span className="top-code">/{u.shortCode}</span><span className="top-orig">{u.originalUrl.replace(/^https?:\/\//, "").substring(0, 28)}…</span></div>
+                                            <span className="top-clicks">{fmt(u.totalClicks)}</span>
+                                        </div>
+                                    ))}
+                                    {urls.length === 0 && <p className="no-data">No link data yet</p>}
+                                </div>
+
+                                <h3 className="sec-title"><Globe size={13} />Top locations</h3>
+                                <div className="locations">
+                                    {topLocations.slice(0, 5).map(loc => {
+                                        const max = topLocations[0]?.count ?? 1;
+                                        return (
+                                            <div key={loc.country} className="loc-item">
+                                                <div className="loc-head"><span>{loc.country}</span><span>{fmt(loc.count)}</span></div>
+                                                <div className="loc-bar"><div className="loc-fill" style={{ width: `${(loc.count / max) * 100}%` }} /></div>
+                                            </div>
+                                        );
+                                    })}
+                                    {topLocations.length === 0 && <p className="no-data">No location data yet</p>}
+                                </div>
+                            </>
+                        )}
+                    </section>
+
+                    {/* Linktree */}
+                    <section className="card">
+                        <div className="card-head"><div className="card-title"><TreePine size={18} /><h2>Linktree</h2></div></div>
+                        {linktreeStatus === "loading" ? (
+                            <div className="empty-state small"><Loader2 size={20} className="spin" /></div>
+                        ) : linktree ? (
+                            <div className="lt-body">
+                                <div className="lt-user">
+                                    <div className="lt-avatar">{(user?.name || "U").charAt(0).toUpperCase()}</div>
+                                    <div><p className="lt-name">{user?.name || "Your"}'s Linktree</p><span className="lt-handle">@{linktree.username}</span></div>
+                                </div>
+                                <span className="lt-count">{linktree.links.length} links</span>
+                                <button className="btn-outline" type="button" onClick={() => navigate("/linktree-builder")}>Edit Linktree<ArrowRight size={14} /></button>
+                            </div>
+                        ) : (
+                            <div className="empty-state small">
+                                <TreePine size={28} /><p>No Linktree yet</p>
+                                <button className="btn-outline" type="button" onClick={() => navigate("/linktree-builder")}>Create one<ArrowRight size={14} /></button>
+                            </div>
+                        )}
+                    </section>
+                </aside>
+            </div>
         </div>
     );
 }
-
-export default Dashboard;
