@@ -1,7 +1,7 @@
 import { apiRequest } from "../../lib/apiClient";
 import type {
     GetLinktreeResponse,
-    UpdateUsernameRequest,
+    UpdateProfileRequest,
     AddLinkRequest,
     AddLinkResponse,
     DeleteLinkResponse,
@@ -16,7 +16,7 @@ export const linktreeApi = {
         });
     },
 
-    updateUsername(payload: UpdateUsernameRequest) {
+    updateProfile(payload: UpdateProfileRequest) {
         return apiRequest(`${LINKTREE_BASE_PATH}/username`, {
             method: "PATCH",
             body: payload,
@@ -37,5 +37,11 @@ export const linktreeApi = {
                 method: "DELETE",
             },
         );
+    },
+
+    getPublicLinktree(username: string) {
+        return apiRequest<GetLinktreeResponse>(`${LINKTREE_BASE_PATH}/${username}`, {
+            method: "GET",
+        });
     },
 };
