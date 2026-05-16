@@ -160,7 +160,7 @@ export default function LinktreeBuilder() {
             <div className="lt-editor">
                 {/* Header */}
                 <div className="lt-header">
-                    <h1>Linktree Builder</h1>
+                    <h1>Bio Page</h1>
                     <p>
                         Customize your public profile and manage your shared
                         links.
