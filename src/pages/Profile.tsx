@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Shield, Trash2, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, Mail, Shield, Trash2, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Camera } from "lucide-react";
 import { useAppDispatch } from "../app/hooks";
 import { updateUser } from "../features/auth/authSlice";
 import { userApi } from "../features/user/userApi";
@@ -21,6 +21,8 @@ export default function Profile() {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -49,12 +51,23 @@ export default function Profile() {
         e.preventDefault();
         if (!profile?._id) return;
 
+        // Validation
+        if (name.trim().length < 2 || name.trim().length > 255) {
+            setError("Name must be between 2 and 255 characters");
+            return;
+        }
+
+        if (phone && (phone.length < 10 || phone.length > 15 || !/^\d+$/.test(phone.replace(/\+/g, '')))) {
+            setError("Phone number must be between 10 and 15 digits");
+            return;
+        }
+
         setIsUpdating(true);
         setError(null);
         try {
             const response = await userApi.updateProfile(profile._id, {
-                name,
-                phone: phone || undefined,
+                name: name.trim(),
+                phone: phone ? phone.trim() : undefined,
             });
             
             const updatedUser = response.data?.user || (response as unknown as { user: unknown }).user as UserProfile;
@@ -142,6 +155,26 @@ export default function Profile() {
                             <User size={18} />
                             <h2>Personal Information</h2>
                         </div>
+                        
+                        <div className="profile-avatar-section">
+                            <div className="profile-avatar-preview">
+                                {profile?.profilePicUrl ? (
+                                    <img src={profile.profilePicUrl} alt="Profile" />
+                                ) : (
+                                    <div className="avatar-placeholder">
+                                        {name.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                )}
+                                <button className="avatar-edit-btn" title="Update Profile Picture">
+                                    <Camera size={16} />
+                                </button>
+                            </div>
+                            <div className="avatar-info">
+                                <h3>{name || 'Your Name'}</h3>
+                                <p>{profile?.email || 'email@example.com'}</p>
+                            </div>
+                        </div>
+
                         <form className="profile-form" onSubmit={handleUpdateProfile}>
                             <div className="profile-field">
                                 <label>Display Name</label>
@@ -198,21 +231,39 @@ export default function Profile() {
                         <div className="profile-form">
                             <div className="profile-field">
                                 <label>Current Password</label>
-                                <input 
-                                    type="password" 
-                                    placeholder="••••••••" 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <div className="profile-input-icon">
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        placeholder="••••••••" 
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="password-toggle-btn"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
                             </div>
                             <div className="profile-field">
                                 <label>New Password</label>
-                                <input 
-                                    type="password" 
-                                    placeholder="Min 6 characters" 
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                />
+                                <div className="profile-input-icon">
+                                    <input 
+                                        type={showNewPassword ? "text" : "password"} 
+                                        placeholder="Min 6 characters" 
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="password-toggle-btn"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                    >
+                                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
                             </div>
                             <button 
                                 type="button" 
