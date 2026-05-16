@@ -71,9 +71,58 @@
     align-items: flex-start;
 }
 
-@media (max-width: 900px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
     .profile-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .profile-sidebar {
+        order: 2;
+    }
+    
+    .profile-main {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-page {
+        padding: 1rem 0.5rem;
+    }
+    
+    .profile-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .profile-card {
+        padding: 1.25rem;
+    }
+    
+    .profile-avatar-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .profile-form {
+        gap: 1.25rem;
+    }
+    
+    .profile-submit-btn, .profile-secondary-btn {
+        padding: 0.75rem;
+    }
+
+    .profile-input-icon input {
+        font-size: 16px; /* Prevents iOS zoom on focus */
     }
 }
 
@@ -131,6 +180,13 @@
     padding-left: 0.25rem;
 }
 
+.field-hint {
+    font-size: 0.75rem;
+    color: #64748b;
+    padding-left: 0.25rem;
+    margin-top: 0.25rem;
+}
+
 .profile-field input {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -139,7 +195,12 @@
     color: #f1f5f9;
     font-family: inherit;
     font-size: 0.95rem;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-field input:hover {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .profile-field input:focus {
@@ -153,17 +214,122 @@
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
-.profile-input-icon svg {
+.profile-input-icon svg:not(.password-toggle-btn svg) {
     position: absolute;
     left: 1rem;
     color: #64748b;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .profile-input-icon input {
     width: 100%;
+    padding: 0.85rem 1rem;
+}
+
+/* Only add left padding if there is an icon at the start */
+.profile-input-icon svg + input {
     padding-left: 2.75rem;
+}
+
+.profile-input-icon input[type="password"],
+.profile-input-icon input[type="text"] {
+    padding-right: 3rem;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.password-toggle-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.profile-avatar-preview {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.2);
+}
+
+.profile-avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(99, 102, 241, 0.3);
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.avatar-edit-btn:hover {
+    background: #6366f1;
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.avatar-info h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 0.25rem;
+}
+
+.avatar-info p {
+    font-size: 0.88rem;
+    color: #94a3b8;
 }
 
 .profile-submit-btn {
