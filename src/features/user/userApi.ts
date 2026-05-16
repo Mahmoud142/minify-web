@@ -17,7 +17,7 @@ export const userApi = {
     updateProfile(id: string, data: UpdateProfileRequest) {
         return apiRequest<UpdateProfileResponse>(`${USER_BASE_PATH}/${id}`, {
             method: "PATCH",
-            body: JSON.stringify(data),
+            body: data,
         });
     },
 
