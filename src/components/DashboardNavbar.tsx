@@ -3,10 +3,10 @@ import {
     BarChart3,
     LayoutDashboard,
     LogOut,
-    MoreVertical,
     Settings,
     Smartphone,
     User,
+    ChevronDown,
     Link as LinkIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -22,7 +22,7 @@ const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Links", path: "/my-links", icon: LinkIcon },
     { label: "Analytics", path: "/analytics", icon: BarChart3 },
-    { label: "Linktree Builder", path: "/linktree-builder", icon: Smartphone },
+    { label: "Bio Page", path: "/linktree-builder", icon: Smartphone },
 ];
 
 function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
@@ -72,10 +72,10 @@ function DashboardNavbar({ userName = "Mina Batmant" }: DashboardNavbarProps) {
                         onClick={() => toggleMenu("profile")}
                     >
                         <div className="profile-avatar">
-                            <User size={18} />
+                            {user?.name?.charAt(0).toUpperCase() || <User size={18} />}
                         </div>
                         <span>{displayName}</span>
-                        <MoreVertical size={14} className="profile-chevron" />
+                        <ChevronDown size={14} className="profile-chevron" />
                     </button>
                     {openMenu === "profile" && (
                         <div
