@@ -10,6 +10,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import MyLinks from "./pages/MyLinks";
 import LinktreeBuilder from "./pages/Linktree/LinktreeBuilder";
 import Analytics from "./pages/Analytics";
+import LinkStats from "./pages/LinkStats";
+import PublicLinktree from "./pages/Linktree/PublicLinktree";
 import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
@@ -19,6 +21,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/mnf/:username" element={<PublicLinktree />} />
                 
                 <Route element={<PublicOnlyRoute />}>
                     <Route element={<AuthLayout />}>
@@ -39,6 +42,7 @@ function App() {
                             element={<LinktreeBuilder />}
                         />
                         <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/link/:id" element={<LinkStats />} />
                     </Route>
                 </Route>
             </Routes>
