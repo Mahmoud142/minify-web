@@ -16,7 +16,6 @@ import { selectLinktree, selectLinktreeStatus } from "../features/linktree/linkt
 import { fetchMyLinktree } from "../features/linktree/linktreeSlice";
 import "./Dashboard.css";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 function fmt(n: number) {
     if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -150,7 +149,7 @@ export default function Dashboard() {
                             {useAlias && (
                                 <div className="field">
                                     <label htmlFor="alias">Custom alias</label>
-                                    <div className="alias-box"><span className="alias-pre">{API_BASE}/url/</span><input id="alias" placeholder="my-brand" value={alias} onChange={e => setAlias(e.target.value)} /></div>
+                                    <div className="alias-box"><span className="alias-pre">{window.location.host}/min.fy/</span><input id="alias" placeholder="my-brand" value={alias} onChange={e => setAlias(e.target.value)} /></div>
                                 </div>
                             )}
                             {shortenError && <div className="form-alert error"><AlertCircle size={15} />{shortenError}</div>}
@@ -191,8 +190,8 @@ export default function Dashboard() {
                                     <div key={u._id} className="link-row">
                                         <div className="link-info">
                                             <div className="link-top">
-                                                <a href={`${API_BASE}/url/${u.shortCode}`} target="_blank" rel="noopener noreferrer" className="link-short">
-                                                    {API_BASE.replace(/^https?:\/\//, "")}/url/{u.shortCode}<ExternalLink size={11} />
+                                                <a href={`${window.location.origin}/min.fy/${u.shortCode}`} target="_blank" rel="noopener noreferrer" className="link-short">
+                                                    {window.location.host}/min.fy/{u.shortCode}<ExternalLink size={11} />
                                                 </a>
                                                 <span className={`badge ${u.isActive ? "b-active" : "b-inactive"}`}>{u.isActive ? "Active" : "Inactive"}</span>
                                             </div>
@@ -200,8 +199,8 @@ export default function Dashboard() {
                                             <div className="link-meta"><span><MousePointerClick size={12} />{fmt(u.totalClicks)} clicks</span><span>{timeAgo(u.createdAt)}</span></div>
                                         </div>
                                         <div className="link-actions">
-                                            <button type="button" className="icon-btn" title="Copy" onClick={() => copy(`${API_BASE}/url/${u.shortCode}`, u._id)}>{copiedId === u._id ? <Check size={15} /> : <Copy size={15} />}</button>
-                                            <button type="button" className="icon-btn" title="QR Code" onClick={() => openQrModal(`${API_BASE}/url/${u.shortCode}`)}><QrCode size={15} /></button>
+                                            <button type="button" className="icon-btn" title="Copy" onClick={() => copy(`${window.location.origin}/min.fy/${u.shortCode}`, u._id)}>{copiedId === u._id ? <Check size={15} /> : <Copy size={15} />}</button>
+                                            <button type="button" className="icon-btn" title="QR Code" onClick={() => openQrModal(`${window.location.origin}/min.fy/${u.shortCode}`)}><QrCode size={15} /></button>
                                             <button type="button" className="icon-btn danger" title="Delete" onClick={() => handleDelete(u._id)}><Trash2 size={15} /></button>
                                         </div>
                                     </div>
