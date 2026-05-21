@@ -8,7 +8,6 @@ import { urlApi } from "../features/urls/urlApi";
 import type { UrlStatsResponse } from "../features/urls/urlTypes";
 import "./LinkStats.css";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 function fmt(n: number) {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -54,7 +53,7 @@ export default function LinkStats() {
 
     const copyUrl = () => {
         if (!data) return;
-        navigator.clipboard.writeText(`${API_BASE}/url/${data.url.shortCode}`);
+        navigator.clipboard.writeText(`${window.location.origin}/min.fy/${data.url.shortCode}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -80,7 +79,7 @@ export default function LinkStats() {
     }
 
     const { url, totalClicks, recentClicks, stats } = data;
-    const shortUrl = `${API_BASE}/url/${url.shortCode}`;
+    const shortUrl = `${window.location.origin}/min.fy/${url.shortCode}`;
     const maxBrowser = stats.browsers[0]?.count ?? 1;
     const maxCountry = stats.countries[0]?.count ?? 1;
 
