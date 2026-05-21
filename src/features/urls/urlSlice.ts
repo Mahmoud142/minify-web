@@ -107,7 +107,7 @@ const urlsSlice = createSlice({
             })
             .addCase(shortenUrl.fulfilled, (state, action) => {
                 state.shortenStatus = "succeeded";
-                state.lastShortenedUrl = action.payload.shortUrl;
+                state.lastShortenedUrl = `${window.location.origin}/min.fy/${action.payload.shortCode}`;
                 // Prepend the new URL into the list
                 const newUrl: UrlData = {
                     _id: action.payload.id,
