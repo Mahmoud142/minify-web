@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
     Link2, Trash2, Copy, Check, ExternalLink,
     Calendar, BarChart2, Search, Loader2, MousePointerClick,
-    AlertTriangle,
+    AlertTriangle, QrCode,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { selectUrls, selectUrlsStatus } from "../features/urls/urlSelectors";
 import { fetchMyUrls, deleteUrl } from "../features/urls/urlSlice";
 import "./MyLinks.css";
+import QrModal from "../components/QrModal";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
@@ -26,6 +27,13 @@ export default function MyLinks() {
     const [searchTerm, setSearchTerm] = useState("");
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrUrl, setQrUrl] = useState("");
+
+    const openQrModal = (urlToUse: string) => {
+        setQrUrl(urlToUse);
+        setQrModalOpen(true);
+    };
 
     useEffect(() => {
         if (urlsStatus === "idle") dispatch(fetchMyUrls());
@@ -160,6 +168,17 @@ export default function MyLinks() {
                                     </button>
                                     <button
                                         type="button"
+                                        className="ml-action-btn"
+                                        title="QR Code"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openQrModal(shortUrl);
+                                        }}
+                                    >
+                                        <QrCode size={16} />
+                                    </button>
+                                    <button
+                                        type="button"
                                         className="ml-action-btn danger"
                                         title="Delete link"
                                         onClick={(e) => {
@@ -192,6 +211,13 @@ export default function MyLinks() {
                     </div>
                 </div>
             )}
+
+            <QrModal
+                isOpen={qrModalOpen}
+                onClose={() => setQrModalOpen(false)}
+                url={qrUrl}
+                title="Minify Link"
+            />
         </div>
     );
 }
