@@ -175,3 +175,9 @@ minify-web/
 │   └── routes/              # Protected & public routing gates
 └── vercel.json              # Edge Proxy & SPA client fallback rules
 ```
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/Mahmoud142">Mahmoud Abdellah</a>
+</p>
