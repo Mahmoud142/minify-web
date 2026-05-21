@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import QrModal from "../components/QrModal";
 import {
     BarChart3, Copy, Check, Link2, QrCode, TrendingUp,
     Globe, MousePointerClick, ExternalLink, Trash2,
@@ -66,6 +67,13 @@ export default function Dashboard() {
     const [useAlias, setUseAlias] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [copiedShort, setCopiedShort] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrUrl, setQrUrl] = useState("");
+
+    const openQrModal = (urlToUse: string) => {
+        setQrUrl(urlToUse);
+        setQrModalOpen(true);
+    };
 
     // Fetch data on mount
     useEffect(() => {
@@ -159,6 +167,7 @@ export default function Dashboard() {
                                 <div className="success-row">
                                     <a href={lastShortenedUrl} target="_blank" rel="noopener noreferrer" className="success-url">{lastShortenedUrl}</a>
                                     <button type="button" className="icon-btn" onClick={copyShortened}>{copiedShort ? <Check size={14} /> : <Copy size={14} />}</button>
+                                    <button type="button" className="icon-btn" title="QR Code" onClick={() => openQrModal(lastShortenedUrl)}><QrCode size={14} /></button>
                                     <button type="button" className="btn-ghost" onClick={() => dispatch(clearShortenState())}>Dismiss</button>
                                 </div>
                             </div>
@@ -192,6 +201,7 @@ export default function Dashboard() {
                                         </div>
                                         <div className="link-actions">
                                             <button type="button" className="icon-btn" title="Copy" onClick={() => copy(`${API_BASE}/url/${u.shortCode}`, u._id)}>{copiedId === u._id ? <Check size={15} /> : <Copy size={15} />}</button>
+                                            <button type="button" className="icon-btn" title="QR Code" onClick={() => openQrModal(`${API_BASE}/url/${u.shortCode}`)}><QrCode size={15} /></button>
                                             <button type="button" className="icon-btn danger" title="Delete" onClick={() => handleDelete(u._id)}><Trash2 size={15} /></button>
                                         </div>
                                     </div>
@@ -250,9 +260,20 @@ export default function Dashboard() {
                             <div className="empty-state small"><Loader2 size={20} className="spin" /></div>
                         ) : linktree ? (
                             <div className="lt-body">
-                                <div className="lt-user">
-                                    <div className="lt-avatar">{(user?.name || "U").charAt(0).toUpperCase()}</div>
-                                    <div><p className="lt-name">{user?.name || "Your"}'s Linktree</p><span className="lt-handle">@{linktree.username}</span></div>
+                                <div className="lt-user" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                        <div className="lt-avatar">{(user?.name || "U").charAt(0).toUpperCase()}</div>
+                                        <div><p className="lt-name">{user?.name || "Your"}'s Linktree</p><span className="lt-handle">@{linktree.username}</span></div>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        className="icon-btn" 
+                                        title="Linktree QR Code" 
+                                        onClick={() => openQrModal(`${window.location.origin}/mnf/${linktree.username}`)}
+                                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "8px", width: "34px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                    >
+                                        <QrCode size={16} />
+                                    </button>
                                 </div>
                                 <span className="lt-count">{linktree.links.length} links</span>
                                 <button className="btn-outline" type="button" onClick={() => navigate("/linktree-builder")}>Edit Linktree<ArrowRight size={14} /></button>
@@ -266,6 +287,13 @@ export default function Dashboard() {
                     </section>
                 </aside>
             </div>
+
+            <QrModal
+                isOpen={qrModalOpen}
+                onClose={() => setQrModalOpen(false)}
+                url={qrUrl}
+                title="Minify Link"
+            />
         </div>
     );
 }

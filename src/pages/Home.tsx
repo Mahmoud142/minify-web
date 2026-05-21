@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import QrModal from "../components/QrModal";
 import {
     Link2,
     ArrowRight,
@@ -20,6 +21,7 @@ import {
     ChevronDown,
     ChevronUp,
     AlertCircle,
+    Heart,
 } from "lucide-react";
 
 const GithubIcon = ({ size = 20 }) => (
@@ -72,22 +74,7 @@ const InstagramIcon = ({ size = 20 }) => (
     </svg>
 );
 
-const DiscordIcon = ({ size = 20 }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M14 8a1.5 1.5 0 0 0-1.5 1.5A1.5 1.5 0 0 0 14 11a1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 14 8zm-4 0a1.5 1.5 0 0 0-1.5 1.5A1.5 1.5 0 0 0 10 11a1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 10 8z" />
-        <path d="M18.8 6.4c-1.3-.9-2.7-1.3-4.2-1.4a.2.2 0 0 0-.2.1c-.2.4-.4.8-.6 1.3-1.6-.2-3.1-.2-4.7 0-.2-.5-.4-1-.5-1.3a.2.2 0 0 0-.2-.1c-1.5.1-2.9.5-4.2 1.4A15 15 0 0 0 1.6 15c1.8 1.4 3.6 2.3 5.4 2.8a.2.2 0 0 0 .2 0l1.3-1.6c-.6-.2-1.1-.4-1.6-.7a.2.2 0 0 1-.1-.3c.1-.1.2-.2.3-.3a.2.2 0 0 1 .2 0c2 .9 4.2 1 6.3 0a.2.2 0 0 1 .2 0c.1.1.2.2.3.2a1 1 0 0 1-.1.4c-.5.3-1 .5-1.6.7l1.3 1.6a.2.2 0 0 0 .2.1c1.8-.5 3.6-1.4 5.4-2.8a15 15 0 0 0-2.6-8.7zM10.1 14.5c-1 0-1.8-1-1.8-2.1s.8-2.1 1.8-2.1 1.8.9 1.8 2.1c0 1.1-.8 2.1-1.8 2.1zm3.8 0c-1 0-1.8-1-1.8-2.1s.8-2.1 1.8-2.1 1.8.9 1.8 2.1c0 1.1-.8 2.1-1.8 2.1z" />
-    </svg>
-);
+
 
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -133,6 +120,14 @@ function Home() {
 
     const [recentLinks, setRecentLinks] = useState<LinkRecord[]>([]);
     const [isLoadingLinks, setIsLoadingLinks] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrUrl, setQrUrl] = useState("");
+    const [avatarError, setAvatarError] = useState(false);
+
+    const openQrModal = (urlToUse: string) => {
+        setQrUrl(urlToUse);
+        setQrModalOpen(true);
+    };
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -613,6 +608,7 @@ function Home() {
                                     <button
                                         className="action-btn"
                                         title="QR Code"
+                                        onClick={() => openQrModal(shortUrl)}
                                     >
                                         <QrCode size={20} />
                                     </button>
@@ -736,6 +732,13 @@ function Home() {
                                                         title="Copy Short URL"
                                                     >
                                                         <Copy size={16} />
+                                                    </button>
+                                                    <button
+                                                        className="modern-action-btn"
+                                                        onClick={() => openQrModal(link.short)}
+                                                        title="QR Code"
+                                                    >
+                                                        <QrCode size={16} />
                                                     </button>
                                                     <a
                                                         href={link.short}
@@ -864,34 +867,35 @@ function Home() {
                     <div className="bio-preview glass-panel">
                         <div className="preview-header">
                             <div className="preview-avatar">
-                                <img
-                                    src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop"
-                                    alt="Profile"
-                                />
+                                {!avatarError ? (
+                                    <img
+                                        src="/avatar.jpg"
+                                        alt="Profile"
+                                        onError={() => setAvatarError(true)}
+                                    />
+                                ) : (
+                                    <div className="avatar-placeholder">M</div>
+                                )}
                             </div>
-                            <div className="preview-name">@beachguy</div>
+                            <div className="preview-name">@Ma7moud_</div>
                             <div className="preview-bio">
-                                Digital Creator & Designer
+                                Software Engineer
                             </div>
                         </div>
                         <div className="preview-links">
-                            <div className="preview-link">
+                            <div className="preview-link github">
                                 <GithubIcon size={20} />
                                 <span>Github</span>
                             </div>
-                            <div className="preview-link">
-                                <DiscordIcon size={20} />
-                                <span>Join Discord</span>
-                            </div>
-                            <div className="preview-link">
+                            <div className="preview-link portfolio">
                                 <Briefcase size={20} />
                                 <span>My Portfolio</span>
                             </div>
-                            <div className="preview-link">
+                            <div className="preview-link facebook">
                                 <FacebookIcon size={20} />
                                 <span>Facebook</span>
                             </div>
-                            <div className="preview-link featured">
+                            <div className="preview-link instagram">
                                 <InstagramIcon size={20} />
                                 <span>Instagram</span>
                             </div>
@@ -1006,19 +1010,36 @@ function Home() {
 
                         <div className="footer-link-group">
                             <h3>Legal</h3>
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
+                            <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+                            <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>
                         </div>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <p>
-                        © {new Date().getFullYear()} Minify. All rights
-                        reserved.
+                    <p className="footer-author">
+                        Built with <Heart className="heart-icon" size={16} fill="currentColor" /> by{" "}
+                        <a
+                            href="https://www.mahmoudabdellah.tech/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="author-name"
+                        >
+                            Mahmoud Abdellah
+                        </a>
+                    </p>
+                    <p className="footer-copyright">
+                        © {new Date().getFullYear()} Minify. All rights reserved.
                     </p>
                 </div>
             </footer>
+
+            <QrModal
+                isOpen={qrModalOpen}
+                onClose={() => setQrModalOpen(false)}
+                url={qrUrl}
+                title="Minify Link"
+            />
         </div>
     );
 }
