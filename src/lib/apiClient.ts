@@ -1,7 +1,7 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://13.61.175.114").replace(
-    /\/+$/,
-    "",
-);
+const isProd = import.meta.env.PROD;
+const API_BASE_URL = isProd
+    ? "/api"
+    : (import.meta.env.VITE_API_BASE_URL || "http://13.61.175.114").replace(/\/+$/, "");
 
 export interface ApiResponse<TData = undefined> {
     status: "success" | "error";
