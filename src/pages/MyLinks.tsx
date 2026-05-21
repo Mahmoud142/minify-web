@@ -11,7 +11,6 @@ import { fetchMyUrls, deleteUrl } from "../features/urls/urlSlice";
 import "./MyLinks.css";
 import QrModal from "../components/QrModal";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 function fmt(n: number) {
     if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -102,7 +101,7 @@ export default function MyLinks() {
                     </div>
                 ) : (
                     filtered.map((link) => {
-                        const shortUrl = `${API_BASE}/url/${link.shortCode}`;
+                        const shortUrl = `${window.location.origin}/min.fy/${link.shortCode}`;
                         return (
                             <div 
                                 key={link._id} 
@@ -118,7 +117,7 @@ export default function MyLinks() {
                                             className="ml-short-url"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {API_BASE.replace(/^https?:\/\//, "")}/url/{link.shortCode}
+                                            {window.location.host}/min.fy/{link.shortCode}
                                             <ExternalLink size={12} />
                                         </a>
                                         <span className={`ml-badge ${link.isActive ? "active" : "paused"}`}>
