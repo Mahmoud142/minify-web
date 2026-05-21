@@ -152,7 +152,8 @@ function Home() {
                     interface MyUrlsResponse {
                         urls?: RawUrl[];
                     }
-                    const responseData = ((response as Record<string, unknown>).data || response) as MyUrlsResponse;
+                    const responseData = ((response as Record<string, unknown>)
+                        .data || response) as MyUrlsResponse;
                     const urls = responseData.urls || [];
                     const formattedLinks = urls.slice(0, 5).map((url) => ({
                         id: url._id || url.id || "",
@@ -184,11 +185,14 @@ function Home() {
         return Math.ceil(rect.height + topOffset);
     };
 
-    const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement> | undefined, id: string) => {
+    const handleNavClick = (
+        e: React.MouseEvent<HTMLAnchorElement> | undefined,
+        id: string,
+    ) => {
         if (e) {
             e.preventDefault();
         }
-        
+
         if (id === "home") {
             window.scrollTo({ top: 0, behavior: "smooth" });
             setActiveSection("home");
@@ -198,9 +202,13 @@ function Home() {
 
         const el = document.getElementById(id);
         if (el) {
-            const header = document.querySelector(".home-header") as HTMLElement | null;
+            const header = document.querySelector(
+                ".home-header",
+            ) as HTMLElement | null;
             const headerHeight = header ? header.offsetHeight : 80;
-            const topOffset = header ? parseInt(window.getComputedStyle(header).top) || 0 : 12;
+            const topOffset = header
+                ? parseInt(window.getComputedStyle(header).top) || 0
+                : 12;
             const totalOffset = headerHeight + topOffset;
 
             // Dynamically query target section top padding to compensate for large layout gaps
@@ -210,8 +218,10 @@ function Home() {
             // Scroll past most of the padding, leaving a beautiful premium 24px gap under the header
             const paddingCompensation = Math.max(0, paddingTop - 24);
 
-            const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-            const offsetPosition = elementPosition + paddingCompensation - totalOffset;
+            const elementPosition =
+                el.getBoundingClientRect().top + window.scrollY;
+            const offsetPosition =
+                elementPosition + paddingCompensation - totalOffset;
 
             window.scrollTo({
                 top: offsetPosition,
@@ -301,7 +311,8 @@ function Home() {
                 id?: string;
                 originalUrl?: string;
             }
-            const responseData = ((response as ShortenResponse).data || response) as ShortenResponse;
+            const responseData = ((response as ShortenResponse).data ||
+                response) as ShortenResponse;
             const newShort =
                 responseData.shortUrl ||
                 `https://min.fy/${responseData.shortCode}`;
@@ -348,7 +359,9 @@ function Home() {
         <div className="app-container home-page-enter">
             <div className="bg-glow"></div>
 
-            <header className={`home-header ${isScrolled ? "is-scrolled" : ""}`}>
+            <header
+                className={`home-header ${isScrolled ? "is-scrolled" : ""}`}
+            >
                 <Link to="/" className="logo">
                     <svg
                         viewBox="0 0 350 100"
