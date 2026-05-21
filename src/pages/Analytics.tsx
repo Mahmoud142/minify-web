@@ -13,7 +13,6 @@ import { fetchGlobalAnalytics } from "../features/analytics/analyticsSlice";
 import { useNavigate } from "react-router-dom";
 import "./Analytics.css";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 function fmt(n: number) {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -123,7 +122,7 @@ export default function Analytics() {
                         <div className="an-links-list">
                             {sortedUrls.map((link, index) => {
                                 const share = totalClicks > 0 ? Math.round((link.totalClicks / totalClicks) * 100) : 0;
-                                const shortUrl = `${API_BASE}/url/${link.shortCode}`;
+                                const shortUrl = `${window.location.origin}/min.fy/${link.shortCode}`;
                                 return (
                                     <div key={link._id} className="an-link-row" onClick={() => navigate(`/link/${link._id}`)}>
                                         <div className="an-link-rank">{index + 1}</div>
