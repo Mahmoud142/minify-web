@@ -152,7 +152,7 @@ function Home() {
                     interface MyUrlsResponse {
                         urls?: RawUrl[];
                     }
-                    const responseData = ((response as Record<string, unknown>)
+                    const responseData = (((response as unknown) as { data?: MyUrlsResponse })
                         .data || response) as MyUrlsResponse;
                     const urls = responseData.urls || [];
                     const formattedLinks = urls.slice(0, 5).map((url) => ({
