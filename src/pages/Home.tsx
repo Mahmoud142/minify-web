@@ -129,20 +129,34 @@ function Home() {
     const [errorMsg, setErrorMsg] = useState("");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState<string>("home");
+    const [isScrolled, setIsScrolled] = useState(false);
 
     const [recentLinks, setRecentLinks] = useState<LinkRecord[]>([]);
     const [isLoadingLinks, setIsLoadingLinks] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
-            setIsLoadingLinks(true);
+            // Defer setState to avoid cascading renders inside the effect body
+            Promise.resolve().then(() => setIsLoadingLinks(true));
             urlApi
                 .getMyUrls()
                 .then((response) => {
-                    const responseData = (response as any).data || response;
+                    interface RawUrl {
+                        _id?: string;
+                        id?: string;
+                        originalUrl: string;
+                        shortCode: string;
+                        totalClicks?: number;
+                        createdAt: string;
+                    }
+                    interface MyUrlsResponse {
+                        urls?: RawUrl[];
+                    }
+                    const responseData = (((response as unknown) as { data?: MyUrlsResponse })
+                        .data || response) as MyUrlsResponse;
                     const urls = responseData.urls || [];
-                    const formattedLinks = urls.slice(0, 5).map((url: any) => ({
-                        id: url._id || url.id,
+                    const formattedLinks = urls.slice(0, 5).map((url) => ({
+                        id: url._id || url.id || "",
                         original: url.originalUrl,
                         short: `https://min.fy/${url.shortCode}`,
                         clicks: url.totalClicks || 0,
@@ -155,7 +169,8 @@ function Home() {
                     setIsLoadingLinks(false);
                 });
         } else {
-            setRecentLinks(loadGuestLinks());
+            // Defer setState to avoid cascading renders inside the effect body
+            Promise.resolve().then(() => setRecentLinks(loadGuestLinks()));
         }
     }, [isAuthenticated]);
 
@@ -170,9 +185,14 @@ function Home() {
         return Math.ceil(rect.height + topOffset);
     };
 
-    const handleNavClick = (e: any, id: string) => {
-        e && e.preventDefault();
-        // Home should always scroll to the very top of the page
+    const handleNavClick = (
+        e: React.MouseEvent<HTMLAnchorElement> | undefined,
+        id: string,
+    ) => {
+        if (e) {
+            e.preventDefault();
+        }
+
         if (id === "home") {
             window.scrollTo({ top: 0, behavior: "smooth" });
             setActiveSection("home");
@@ -182,17 +202,45 @@ function Home() {
 
         const el = document.getElementById(id);
         if (el) {
-            // target inner header if present, but use native scrollIntoView so
-            // CSS `scroll-margin-top` (set from --header-offset) handles offset
-            const innerHeader = el.querySelector(
-                ".bio-header",
+            const header = document.querySelector(
+                ".home-header",
             ) as HTMLElement | null;
-            const targetEl = (innerHeader || el) as HTMLElement;
-            targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+            const headerHeight = header ? header.offsetHeight : 80;
+            const topOffset = header
+                ? parseInt(window.getComputedStyle(header).top) || 0
+                : 12;
+            const totalOffset = headerHeight + topOffset;
+
+            // Dynamically query target section top padding to compensate for large layout gaps
+            const computedStyle = window.getComputedStyle(el);
+            const paddingTop = parseInt(computedStyle.paddingTop) || 0;
+
+            // Scroll past most of the padding, leaving a beautiful premium 24px gap under the header
+            const paddingCompensation = Math.max(0, paddingTop - 24);
+
+            const elementPosition =
+                el.getBoundingClientRect().top + window.scrollY;
+            const offsetPosition =
+                elementPosition + paddingCompensation - totalOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+            });
             setActiveSection(id);
         }
         setIsMobileMenuOpen(false);
     };
+
+    // Add scroll event listener to update header style on scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        handleScroll();
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     // expose CSS variable for scroll-margin-top so browsers' native anchor scrolling also works
     useEffect(() => {
@@ -205,7 +253,11 @@ function Home() {
         };
         updateVar();
         window.addEventListener("resize", updateVar);
-        return () => window.removeEventListener("resize", updateVar);
+        window.addEventListener("scroll", updateVar, { passive: true });
+        return () => {
+            window.removeEventListener("resize", updateVar);
+            window.removeEventListener("scroll", updateVar);
+        };
     }, []);
 
     useEffect(() => {
@@ -220,7 +272,7 @@ function Home() {
                     }
                 });
             },
-            { root: null, rootMargin: "-20% 0px -60% 0px", threshold: 0.1 },
+            { root: null, rootMargin: "-30% 0px -50% 0px", threshold: 0.1 },
         );
         sections.forEach((s) => obs.observe(s));
         return () => obs.disconnect();
@@ -247,7 +299,20 @@ function Home() {
             });
 
             // Handle standard ApiResponse or plain object from backend
-            const responseData = (response as any).data || response;
+            interface ShortenResponse {
+                data?: {
+                    shortUrl?: string;
+                    shortCode?: string;
+                    id?: string;
+                    originalUrl?: string;
+                };
+                shortUrl?: string;
+                shortCode?: string;
+                id?: string;
+                originalUrl?: string;
+            }
+            const responseData = ((response as ShortenResponse).data ||
+                response) as ShortenResponse;
             const newShort =
                 responseData.shortUrl ||
                 `https://min.fy/${responseData.shortCode}`;
@@ -272,9 +337,10 @@ function Home() {
             setUrl("");
             setCustomAlias("");
             setShowAdvanced(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as { message?: string };
             setErrorMsg(
-                error?.message || "Failed to shorten URL. Please try again.",
+                err?.message || "Failed to shorten URL. Please try again.",
             );
         } finally {
             setIsLoading(false);
@@ -290,10 +356,12 @@ function Home() {
     };
 
     return (
-        <div id="home" className="app-container home-page-enter">
+        <div className="app-container home-page-enter">
             <div className="bg-glow"></div>
 
-            <header className="home-header">
+            <header
+                className={`home-header ${isScrolled ? "is-scrolled" : ""}`}
+            >
                 <Link to="/" className="logo">
                     <svg
                         viewBox="0 0 350 100"
@@ -380,7 +448,7 @@ function Home() {
             </header>
 
             <main>
-                <section className="home-hero-section">
+                <section className="home-hero-section" id="home">
                     <h1 className="hero-title">
                         Your{" "}
                         <span className="text-gradient">digital presence</span>
@@ -632,12 +700,14 @@ function Home() {
                                                         {link.date}
                                                     </span>
                                                 </div>
-                                                <div className="modern-clicks-badge">
-                                                    <BarChart3 size={14} />
-                                                    <span>
-                                                        {link.clicks} clicks
-                                                    </span>
-                                                </div>
+                                                {isAuthenticated && (
+                                                    <div className="modern-clicks-badge">
+                                                        <BarChart3 size={14} />
+                                                        <span>
+                                                            {link.clicks} clicks
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="modern-card-bottom">
                                                 <div className="modern-short-wrapper">
