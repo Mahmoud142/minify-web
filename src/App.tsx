@@ -14,6 +14,7 @@ import Analytics from "./pages/Analytics";
 import LinkStats from "./pages/LinkStats";
 import Profile from "./pages/Profile";
 import PublicLinktree from "./pages/Linktree/PublicLinktree";
+import Redirection from "./pages/Redirection";
 import AuthLayout from "./layouts/AuthLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
@@ -35,6 +36,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/mnf/:username" element={<PublicLinktree />} />
+                <Route path="/min.fy/:code" element={<Redirection />} />
                 
                 <Route element={<PublicOnlyRoute />}>
                     <Route element={<AuthLayout />}>
