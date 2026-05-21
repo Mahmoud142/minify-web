@@ -76,7 +76,7 @@ const InstagramIcon = ({ size = 20 }) => (
 
 
 
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSelectors";
 import { urlApi } from "../features/urls/urlApi";
@@ -107,6 +107,7 @@ const saveGuestLinks = (links: LinkRecord[]) => {
 
 function Home() {
     const isAuthenticated = useSelector(selectIsAuthenticated);
+
     const [url, setUrl] = useState("");
     const [customAlias, setCustomAlias] = useState("");
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -153,7 +154,7 @@ function Home() {
                     const formattedLinks = urls.slice(0, 5).map((url) => ({
                         id: url._id || url.id || "",
                         original: url.originalUrl,
-                        short: `https://min.fy/${url.shortCode}`,
+                        short: `${window.location.origin}/min.fy/${url.shortCode}`,
                         clicks: url.totalClicks || 0,
                         date: new Date(url.createdAt).toLocaleDateString(),
                     }));
@@ -308,9 +309,7 @@ function Home() {
             }
             const responseData = ((response as ShortenResponse).data ||
                 response) as ShortenResponse;
-            const newShort =
-                responseData.shortUrl ||
-                `https://min.fy/${responseData.shortCode}`;
+            const newShort = `${window.location.origin}/min.fy/${responseData.shortCode}`;
 
             setShortUrl(newShort);
 
@@ -349,6 +348,10 @@ function Home() {
             setTimeout(() => setIsCopied(false), 2000);
         }
     };
+
+    if (isAuthenticated) {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     return (
         <div className="app-container home-page-enter">
