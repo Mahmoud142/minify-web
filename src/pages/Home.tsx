@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Link2,
     ArrowRight,
@@ -16,12 +16,10 @@ import {
     Menu,
     X,
     Briefcase,
-    Mail,
-    Shield,
-    FileText,
-    BookOpen,
-    ArrowUpRight,
-    LifeBuoy,
+    Loader2,
+    ChevronDown,
+    ChevronUp,
+    AlertCircle,
 } from "lucide-react";
 
 const GithubIcon = ({ size = 20 }) => (
@@ -92,6 +90,9 @@ const DiscordIcon = ({ size = 20 }) => (
 );
 
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../features/auth/authSelectors";
+import { urlApi } from "../features/urls/urlApi";
 import "./Home.css";
 
 interface LinkRecord {
@@ -102,61 +103,182 @@ interface LinkRecord {
     date: string;
 }
 
+const GUEST_LINKS_KEY = "minify.guest.links";
+
+const loadGuestLinks = (): LinkRecord[] => {
+    try {
+        const stored = localStorage.getItem(GUEST_LINKS_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveGuestLinks = (links: LinkRecord[]) => {
+    localStorage.setItem(GUEST_LINKS_KEY, JSON.stringify(links.slice(0, 10)));
+};
+
 function Home() {
+    const isAuthenticated = useSelector(selectIsAuthenticated);
     const [url, setUrl] = useState("");
     const [customAlias, setCustomAlias] = useState("");
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [shortUrl, setShortUrl] = useState("");
     const [isCopied, setIsCopied] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState<string>("home");
 
-    const [recentLinks, setRecentLinks] = useState<LinkRecord[]>([
-        {
-            id: "1",
-            original:
-                "https://github.com/batmant/URL-Shortener/tree/main/utils",
-            short: "https://min.fy/x7q2p9",
-            clicks: 12,
-            date: "Just now",
-        },
-        {
-            id: "2",
-            original: "https://react.dev/learn/state-a-components-memory",
-            short: "https://min.fy/react-state",
-            clicks: 84,
-            date: "2 hours ago",
-        },
-    ]);
+    const [recentLinks, setRecentLinks] = useState<LinkRecord[]>([]);
+    const [isLoadingLinks, setIsLoadingLinks] = useState(false);
 
-    const handleShorten = (e: React.FormEvent) => {
+    useEffect(() => {
+        if (isAuthenticated) {
+            setIsLoadingLinks(true);
+            urlApi
+                .getMyUrls()
+                .then((response) => {
+                    const responseData = (response as any).data || response;
+                    const urls = responseData.urls || [];
+                    const formattedLinks = urls.slice(0, 5).map((url: any) => ({
+                        id: url._id || url.id,
+                        original: url.originalUrl,
+                        short: `https://min.fy/${url.shortCode}`,
+                        clicks: url.totalClicks || 0,
+                        date: new Date(url.createdAt).toLocaleDateString(),
+                    }));
+                    setRecentLinks(formattedLinks);
+                })
+                .catch(console.error)
+                .finally(() => {
+                    setIsLoadingLinks(false);
+                });
+        } else {
+            setRecentLinks(loadGuestLinks());
+        }
+    }, [isAuthenticated]);
+
+    const computeHeaderOffset = () => {
+        const header = document.querySelector(
+            ".home-header",
+        ) as HTMLElement | null;
+        if (!header) return 0;
+        const rect = header.getBoundingClientRect();
+        // include any offset from top (sticky top) so target sits right under header
+        const topOffset = Math.max(0, rect.top);
+        return Math.ceil(rect.height + topOffset);
+    };
+
+    const handleNavClick = (e: any, id: string) => {
+        e && e.preventDefault();
+        // Home should always scroll to the very top of the page
+        if (id === "home") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            setActiveSection("home");
+            setIsMobileMenuOpen(false);
+            return;
+        }
+
+        const el = document.getElementById(id);
+        if (el) {
+            // target inner header if present, but use native scrollIntoView so
+            // CSS `scroll-margin-top` (set from --header-offset) handles offset
+            const innerHeader = el.querySelector(
+                ".bio-header",
+            ) as HTMLElement | null;
+            const targetEl = (innerHeader || el) as HTMLElement;
+            targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+            setActiveSection(id);
+        }
+        setIsMobileMenuOpen(false);
+    };
+
+    // expose CSS variable for scroll-margin-top so browsers' native anchor scrolling also works
+    useEffect(() => {
+        const updateVar = () => {
+            const val = computeHeaderOffset();
+            document.documentElement.style.setProperty(
+                "--header-offset",
+                `${val}px`,
+            );
+        };
+        updateVar();
+        window.addEventListener("resize", updateVar);
+        return () => window.removeEventListener("resize", updateVar);
+    }, []);
+
+    useEffect(() => {
+        const sections = Array.from(document.querySelectorAll("section[id]"));
+        if (!sections.length) return;
+        const obs = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const id = (entry.target as HTMLElement).id;
+                        setActiveSection(id || "home");
+                    }
+                });
+            },
+            { root: null, rootMargin: "-20% 0px -60% 0px", threshold: 0.1 },
+        );
+        sections.forEach((s) => obs.observe(s));
+        return () => obs.disconnect();
+    }, []);
+
+    const handleShorten = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMsg("");
+        setShortUrl("");
+
         if (!url) return;
+
+        if (customAlias && !isAuthenticated) {
+            setErrorMsg("You need to sign in to use a custom alias.");
+            return;
+        }
 
         setIsLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            const newShort = customAlias
-                ? `https://min.fy/${customAlias}`
-                : `https://min.fy/${Math.random().toString(36).substring(2, 8)}`;
+        try {
+            const response = await urlApi.shortenUrl({
+                originalUrl: url,
+                shortCode: customAlias || undefined,
+            });
+
+            // Handle standard ApiResponse or plain object from backend
+            const responseData = (response as any).data || response;
+            const newShort =
+                responseData.shortUrl ||
+                `https://min.fy/${responseData.shortCode}`;
 
             setShortUrl(newShort);
 
             const newRecord: LinkRecord = {
-                id: Date.now().toString(),
-                original: url,
+                id: responseData.id || Date.now().toString(),
+                original: responseData.originalUrl || url,
                 short: newShort,
                 clicks: 0,
                 date: "Just now",
             };
 
-            setRecentLinks([newRecord, ...recentLinks]);
-            setIsLoading(false);
+            const updatedLinks = [newRecord, ...recentLinks];
+            setRecentLinks(updatedLinks);
+
+            if (!isAuthenticated) {
+                saveGuestLinks(updatedLinks);
+            }
+
             setUrl("");
             setCustomAlias("");
             setShowAdvanced(false);
-        }, 1000);
+        } catch (error: any) {
+            setErrorMsg(
+                error?.message || "Failed to shorten URL. Please try again.",
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const copyToClipboard = (text: string, isMain: boolean = true) => {
@@ -168,7 +290,7 @@ function Home() {
     };
 
     return (
-        <div className="app-container home-page-enter">
+        <div id="home" className="app-container home-page-enter">
             <div className="bg-glow"></div>
 
             <header className="home-header">
@@ -217,18 +339,25 @@ function Home() {
                 >
                     <div className="nav-links-center">
                         <a
-                            href="#features"
-                            className="nav-link"
-                            onClick={() => setIsMobileMenuOpen(false)}
+                            href="#home"
+                            className={`nav-link ${activeSection === "home" ? "active" : ""}`}
+                            onClick={(e) => handleNavClick(e, "home")}
                         >
-                            Features
+                            Home
                         </a>
                         <a
-                            href="#bio-pages"
-                            className="nav-link"
-                            onClick={() => setIsMobileMenuOpen(false)}
+                            href="#bio-page"
+                            className={`nav-link ${activeSection === "bio-page" ? "active" : ""}`}
+                            onClick={(e) => handleNavClick(e, "bio-page")}
                         >
-                            Bio Pages
+                            Bio Page
+                        </a>
+                        <a
+                            href="#features"
+                            className={`nav-link ${activeSection === "features" ? "active" : ""}`}
+                            onClick={(e) => handleNavClick(e, "features")}
+                        >
+                            Features
                         </a>
                     </div>
                     <div className="nav-actions">
@@ -283,7 +412,14 @@ function Home() {
                                         disabled={isLoading}
                                         aria-label="Shorten URL"
                                     >
-                                        <ArrowRight size={20} />
+                                        {isLoading ? (
+                                            <Loader2
+                                                size={24}
+                                                className="spin-animation"
+                                            />
+                                        ) : (
+                                            <ArrowRight size={24} />
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -300,13 +436,27 @@ function Home() {
                                     {showAdvanced
                                         ? "Hide advanced options"
                                         : "Advanced options"}
+                                    {showAdvanced ? (
+                                        <ChevronUp size={16} />
+                                    ) : (
+                                        <ChevronDown size={16} />
+                                    )}
                                 </button>
                             </div>
 
                             {showAdvanced && (
                                 <div className="advanced-options animate-fade-in">
                                     <div className="form-group">
-                                        <label>Custom Alias (Optional)</label>
+                                        <label
+                                            style={{
+                                                display: "block",
+                                                marginBottom: "0.5rem",
+                                                color: "var(--text-secondary)",
+                                                fontSize: "0.9rem",
+                                            }}
+                                        >
+                                            Custom Alias (Optional)
+                                        </label>
                                         <div className="prefix-input">
                                             <span className="prefix">
                                                 min.fy/
@@ -322,6 +472,52 @@ function Home() {
                                                 }
                                             />
                                         </div>
+                                        {customAlias && !isAuthenticated && (
+                                            <div
+                                                className="custom-alias-warning"
+                                                style={{
+                                                    marginTop: "12px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                }}
+                                            >
+                                                <AlertCircle size={16} />
+                                                <span>
+                                                    You need to{" "}
+                                                    <Link
+                                                        to="/login"
+                                                        style={{
+                                                            textDecoration:
+                                                                "underline",
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        sign in
+                                                    </Link>{" "}
+                                                    to use a custom alias.
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {errorMsg && (
+                                <div
+                                    className="error-message"
+                                    style={{ marginTop: "1.5rem" }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <AlertCircle size={16} />
+                                        {errorMsg}
                                     </div>
                                 </div>
                             )}
@@ -333,7 +529,15 @@ function Home() {
                                     <p className="result-label">
                                         Your shortened URL is ready:
                                     </p>
-                                    <span className="short-url">
+                                    <span
+                                        className="short-url"
+                                        style={{
+                                            background:
+                                                "var(--accent-gradient)",
+                                            WebkitBackgroundClip: "text",
+                                            WebkitTextFillColor: "transparent",
+                                        }}
+                                    >
                                         {shortUrl}
                                     </span>
                                 </div>
@@ -342,12 +546,21 @@ function Home() {
                                         className="action-btn"
                                         title="QR Code"
                                     >
-                                        <QrCode size={18} />
+                                        <QrCode size={20} />
                                     </button>
                                     <button
                                         className="copy-btn btn-primary"
                                         onClick={() =>
                                             copyToClipboard(shortUrl)
+                                        }
+                                        style={
+                                            isCopied
+                                                ? {
+                                                      background: "#10b981",
+                                                      transform: "none",
+                                                      boxShadow: "none",
+                                                  }
+                                                : {}
                                         }
                                     >
                                         {isCopied ? (
@@ -367,81 +580,190 @@ function Home() {
                     </div>
                 </section>
 
-                {recentLinks.length > 0 && (
-                    <section className="home-recent-section">
-                        <div className="recent-links-section">
-                            <div className="section-header">
-                                <History size={20} className="text-gradient" />
-                                <h2>Recent Activity</h2>
+                <section className="home-recent-section">
+                    <div className="recent-links-section">
+                        <div className="section-header modern-header">
+                            <div className="modern-header-icon">
+                                <History size={22} className="text-gradient" />
                             </div>
-                            <div className="links-list">
+                            <div>
+                                <h2 className="modern-header-title">
+                                    Recent Activity
+                                </h2>
+                                <p className="modern-header-subtitle">
+                                    Manage and track your latest shortened URLs
+                                </p>
+                            </div>
+                        </div>
+
+                        {isLoadingLinks ? (
+                            <div className="empty-state glass-panel modern-empty">
+                                <Loader2
+                                    size={32}
+                                    className="spin-animation"
+                                    style={{
+                                        color: "var(--accent-primary)",
+                                        marginBottom: "1rem",
+                                    }}
+                                />
+                                <p>Loading your links...</p>
+                            </div>
+                        ) : recentLinks.length > 0 ? (
+                            <div className="modern-links-grid">
                                 {recentLinks.map((link) => (
                                     <div
                                         key={link.id}
-                                        className="link-card glass-panel"
+                                        className="modern-link-card"
                                     >
-                                        <div className="link-card-left">
-                                            <p
-                                                className="link-original"
-                                                title={link.original}
-                                            >
-                                                {link.original}
-                                            </p>
-                                            <div className="link-meta">
-                                                <span>{link.date}</span>
-                                                <span className="dot">•</span>
-                                                <span>
-                                                    <BarChart3 size={14} />{" "}
-                                                    {link.clicks} clicks
-                                                </span>
+                                        <div className="modern-card-bg"></div>
+                                        <div className="modern-card-content">
+                                            <div className="modern-card-top">
+                                                <div className="modern-url-icon">
+                                                    <Globe size={20} />
+                                                </div>
+                                                <div className="modern-url-details">
+                                                    <p
+                                                        className="modern-original-url"
+                                                        title={link.original}
+                                                    >
+                                                        {link.original}
+                                                    </p>
+                                                    <span className="modern-date-badge">
+                                                        {link.date}
+                                                    </span>
+                                                </div>
+                                                <div className="modern-clicks-badge">
+                                                    <BarChart3 size={14} />
+                                                    <span>
+                                                        {link.clicks} clicks
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="link-card-right">
-                                            <a
-                                                href={link.short}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="link-short"
-                                            >
-                                                {link.short}
-                                            </a>
-                                            <div className="link-card-actions">
-                                                <button
-                                                    className="icon-btn"
-                                                    onClick={() =>
-                                                        copyToClipboard(
-                                                            link.short,
-                                                            false,
-                                                        )
-                                                    }
-                                                    title="Copy"
-                                                >
-                                                    <Copy size={16} />
-                                                </button>
-                                                <a
-                                                    href={link.short}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="icon-btn"
-                                                    title="Visit"
-                                                >
-                                                    <ExternalLink size={16} />
-                                                </a>
+                                            <div className="modern-card-bottom">
+                                                <div className="modern-short-wrapper">
+                                                    <div className="modern-pulse-dot"></div>
+                                                    <a
+                                                        href={link.short}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="modern-short-url"
+                                                    >
+                                                        {link.short.replace(
+                                                            "https://",
+                                                            "",
+                                                        )}
+                                                    </a>
+                                                </div>
+                                                <div className="modern-card-actions">
+                                                    <button
+                                                        className="modern-action-btn"
+                                                        onClick={() =>
+                                                            copyToClipboard(
+                                                                link.short,
+                                                                false,
+                                                            )
+                                                        }
+                                                        title="Copy Short URL"
+                                                    >
+                                                        <Copy size={16} />
+                                                    </button>
+                                                    <a
+                                                        href={link.short}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="modern-action-btn primary-action"
+                                                        title="Visit Short URL"
+                                                    >
+                                                        <ExternalLink
+                                                            size={16}
+                                                        />
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    </section>
-                )}
+                        ) : (
+                            <div
+                                className="empty-state glass-panel"
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "1.25rem",
+                                    padding: "2rem",
+                                    borderRadius: "20px",
+                                    textAlign: "left",
+                                    background: "rgba(17, 17, 24, 0.4)",
+                                    border: "1px dashed rgba(255,255,255,0.1)",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        background: "rgba(79, 70, 229, 0.1)",
+                                        border: "1px solid rgba(79, 70, 229, 0.2)",
+                                        width: "56px",
+                                        height: "56px",
+                                        borderRadius: "16px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0,
+                                        boxShadow:
+                                            "0 8px 20px rgba(79, 70, 229, 0.15)",
+                                    }}
+                                >
+                                    <Link2
+                                        size={28}
+                                        style={{
+                                            color: "#818cf8",
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <h3
+                                        style={{
+                                            fontSize: "1.15rem",
+                                            marginBottom: "0.25rem",
+                                            fontWeight: "600",
+                                        }}
+                                    >
+                                        No links yet
+                                    </h3>
+                                    <p
+                                        style={{
+                                            color: "var(--text-secondary)",
+                                            fontSize: "0.95rem",
+                                            margin: 0,
+                                        }}
+                                    >
+                                        {isAuthenticated
+                                            ? "Paste a URL above to start."
+                                            : "Sign in to save and track links."}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
                 <section
                     className="home-bio-section bio-showcase"
-                    id="bio-pages"
+                    id="bio-page"
                 >
+                    <div className="bio-header">
+                        <h1 className="bio-hero-title">
+                            <Layers size={34} className="bio-hero-icon" />
+                            Bio Page
+                        </h1>
+                        <p className="bio-hero-sub">
+                            One link to showcase your profiles, content, and
+                            important links.
+                        </p>
+                    </div>
                     <div className="bio-content">
-                        <div className="badge">New: Bio Pages</div>
+                        <div className="badge">New: Bio Page</div>
                         <h2 className="section-title">
                             One link for everything.
                         </h2>
@@ -571,7 +893,11 @@ function Home() {
             <footer className="home-footer-section">
                 <div className="footer-content">
                     <div className="footer-brand">
-                        <Link to="/" className="footer-logo" aria-label="Minify home">
+                        <Link
+                            to="/"
+                            className="footer-logo"
+                            aria-label="Minify home"
+                        >
                             <svg
                                 className="footer-logo-mark"
                                 viewBox="0 0 80 80"
@@ -590,89 +916,37 @@ function Home() {
                             <span>Minify</span>
                         </Link>
                         <p>
-                            Shorten links, build bio pages, and understand every
-                            click from one calm workspace.
+                            Shorten URLs, build bio pages, and understand your
+                            audience. All in one place.
                         </p>
-                        <div className="footer-socials" aria-label="Social links">
-                            <a href="#" aria-label="Minify on Github">
-                                <GithubIcon size={18} />
-                            </a>
-                            <a href="#" aria-label="Minify on Instagram">
-                                <InstagramIcon size={18} />
-                            </a>
-                            <a href="#" aria-label="Minify community on Discord">
-                                <DiscordIcon size={18} />
-                            </a>
-                        </div>
                     </div>
 
                     <div className="footer-link-grid">
                         <div className="footer-link-group">
                             <h3>Product</h3>
-                            <a href="#features">
-                                <Zap size={16} />
-                                Features
-                            </a>
-                            <a href="#bio-pages">
-                                <Link2 size={16} />
-                                Bio pages
-                            </a>
-                            <Link to="/signup">
-                                <BarChart3 size={16} />
-                                Analytics
-                            </Link>
+                            <a href="#features">Features</a>
+                            <a href="#bio-pages">Bio Pages</a>
                         </div>
 
                         <div className="footer-link-group">
-                            <h3>Resources</h3>
-                            <a href="#">
-                                <BookOpen size={16} />
-                                API docs
-                            </a>
-                            <a href="#">
-                                <LifeBuoy size={16} />
-                                Help center
-                            </a>
-                            <a href="#">
-                                <Mail size={16} />
-                                Contact
-                            </a>
+                            <h3>Account</h3>
+                            <Link to="/login">Sign In</Link>
+                            <Link to="/signup">Get Started</Link>
                         </div>
 
                         <div className="footer-link-group">
-                            <h3>Company</h3>
-                            <a href="#">
-                                <Shield size={16} />
-                                Privacy
-                            </a>
-                            <a href="#">
-                                <FileText size={16} />
-                                Terms
-                            </a>
-                            <Link to="/login">
-                                <ArrowUpRight size={16} />
-                                Sign in
-                            </Link>
+                            <h3>Legal</h3>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
                         </div>
-                    </div>
-
-                    <div className="footer-cta">
-                        <span className="footer-cta-label">Ready in seconds</span>
-                        <h3>Make every link easier to trust.</h3>
-                        <Link to="/signup" className="btn btn-primary footer-cta-btn">
-                            Get Started
-                            <ArrowRight size={18} />
-                        </Link>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <p>© 2026 Minify. All rights reserved.</p>
-                    <div className="footer-bottom-links">
-                        <a href="#">Status</a>
-                        <a href="#">Security</a>
-                        <a href="#">Changelog</a>
-                    </div>
+                    <p>
+                        © {new Date().getFullYear()} Minify. All rights
+                        reserved.
+                    </p>
                 </div>
             </footer>
         </div>
